@@ -14,14 +14,14 @@ alert /** @type {import("../typings")} */
 
 'use strict';
 
-const SPEED = 300;
+const SPEED = 50;
 const UPPER_HAND_IS_DEALER = -1;
 const LOWER_HAND_IS_DEALER = 1;
 const FRONT_FRAME = 0;
 const BACK_FRAME = 1;
 const HAND_DIST_FROM_HORISONTAL_BORDERS = 150;
 const HAND_DIST_FROM_VERTICAL_BORDERS = 200;
-const HAND_DIST_BETWEEN_CARDS = 100;
+const HAND_DIST_BETWEEN_CARDS = 50;
 const TRICKS_FROM_HORISONTAL_BORDER = 350;
 
 class PlayScene extends Phaser.Scene {
@@ -92,16 +92,16 @@ class PlayScene extends Phaser.Scene {
   /////////////////////////////////////////////////////////////////////
   deal() {
     let dealTween = [];
-    for (let i = 0; i < CARD_PARITY_IDS.length; i++) {
-      let card_id = gameParity.dealer.deck[i];
+    //    let top_card_id;
+//    for (let i = 0; i < CARD_PARITY_IDS.length; i++) {
+    for (let i = CARD_PARITY_IDS.length - 1; i > -1; i--) {
+        let card_id = gameParity.dealer.deck[i];
 
       let y_base = 0;
-      if ((i % 2 != 0 &&
-           UPPER_HAND_IS_DEALER == gameParity.dealer.current_dealer) ||
-          (i % 2 == 0 &&
-           LOWER_HAND_IS_DEALER == gameParity.dealer.current_dealer)) {
-        y_base = HAND_DIST_FROM_HORISONTAL_BORDERS;
+      if ((i % 2 != 0 && gameParity.upperHandPlayer == gameParity.dealer.current_dealer) ||
+          (i % 2 == 0 && gameParity.lowerHandPlayer == gameParity.dealer.current_dealer)) {
         this.upper_hand_ids.push(card_id);
+        y_base = HAND_DIST_FROM_HORISONTAL_BORDERS;
       } else {
         this.lower_hand_ids.push(card_id);
         this.sprites_hash[card_id].setInteractive();
@@ -126,7 +126,7 @@ class PlayScene extends Phaser.Scene {
       })
 
       dealTween[i].on('complete', () => {
-        if (i != 11) {  // The cards to be dealth
+        if (i != CARD_PARITY_IDS.length - 1) {  // The cards to be dealth
           dealTween[i + 1].play();
         } else {
           // Turn the lower hand cards to show front
@@ -134,16 +134,22 @@ class PlayScene extends Phaser.Scene {
             this.showFront(e);
           });
 
-          //          this.sprites_hash[top_card_id].off('pointerdown');
 
-          //          this.placeCardsNice();
-          //          this.emitter.on('placed_cards_nice', () => {
-          //            this.emitter.off('placed_cards_nice');
-          //            this.emitter.emit('begin_round');
-          //          }, this);
+//          this.placeCardsNice();
+//          this.emitter.on('placed_cards_nice', () => {
+//            this.emitter.off('placed_cards_nice');
+//            this.emitter.emit('begin_round');
+//          }, this);
+
+
+
         }
       });
     }
+
+    //    if (TEST) {
+    dealTween[0].play();
+    //    }
   }
 
   showFront(card_id) {
