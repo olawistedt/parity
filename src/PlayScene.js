@@ -14,7 +14,7 @@ alert /** @type {import("../typings")} */
 
 'use strict';
 
-const SPEED = 50;
+const SPEED = 0;
 const UPPER_HAND_IS_DEALER = -1;
 const LOWER_HAND_IS_DEALER = 1;
 const FRONT_FRAME = 0;
@@ -147,9 +147,7 @@ class PlayScene extends Phaser.Scene {
       });
     }
 
-    //    if (TEST) {
     dealTween[0].play();
-    //    }
   }
 
   placeCardsNice() {
@@ -158,11 +156,10 @@ class PlayScene extends Phaser.Scene {
 
     console.log('Upper hand ' + gameParity.upperHandPlayer.getHand());
     console.log('Lower hand ' + gameParity.lowerHandPlayer.getHand());
-    console.log('Place cards nice 1')
+    
     if (gameParity.upperHandPlayer.getHand().length == 0) {
       return;
     }
-    console.log('Place cards nice 2')
 
 
 
