@@ -54,6 +54,11 @@ class Player {
   getHand() {
     return this.hand;
   }
+
+  sortHand() {
+    this.hand.sort();
+    this.hand.reverse();
+  }
 }
 
 /**
@@ -283,6 +288,10 @@ class GameParity extends Game {
     this.judge.init(dealOrder[0], dealOrder[1]);
     this.dealer.shuffle();
     this.dealer.deal();
+    this.upperHandPlayer.sortHand();
+    this.lowerHandPlayer.sortHand();
+    console.log('Upper hand ' + this.upperHandPlayer.getHand());
+    console.log('Lower hand ' + this.lowerHandPlayer.getHand());
     this.judge.trump = this.judge.leader.getTrump();
     this.judge.parity = this.judge.opponent.getParity();
     for (let i = 0; i < 15; i++) {

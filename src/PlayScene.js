@@ -93,13 +93,15 @@ class PlayScene extends Phaser.Scene {
   deal() {
     let dealTween = [];
     //    let top_card_id;
-//    for (let i = 0; i < CARD_PARITY_IDS.length; i++) {
+    //    for (let i = 0; i < CARD_PARITY_IDS.length; i++) {
     for (let i = CARD_PARITY_IDS.length - 1; i > -1; i--) {
-        let card_id = gameParity.dealer.deck[i];
+      let card_id = gameParity.dealer.deck[i];
 
       let y_base = 0;
-      if ((i % 2 != 0 && gameParity.upperHandPlayer == gameParity.dealer.current_dealer) ||
-          (i % 2 == 0 && gameParity.lowerHandPlayer == gameParity.dealer.current_dealer)) {
+      if ((i % 2 != 0 &&
+           gameParity.upperHandPlayer == gameParity.dealer.current_dealer) ||
+          (i % 2 == 0 &&
+           gameParity.lowerHandPlayer == gameParity.dealer.current_dealer)) {
         this.upper_hand_ids.push(card_id);
         y_base = HAND_DIST_FROM_HORISONTAL_BORDERS;
       } else {
@@ -134,15 +136,13 @@ class PlayScene extends Phaser.Scene {
             this.showFront(e);
           });
 
+          gameParity.dealer.deal();
 
-//          this.placeCardsNice();
-//          this.emitter.on('placed_cards_nice', () => {
-//            this.emitter.off('placed_cards_nice');
-//            this.emitter.emit('begin_round');
-//          }, this);
-
-
-
+          this.placeCardsNice();
+          //          this.emitter.on('placed_cards_nice', () => {
+          //            this.emitter.off('placed_cards_nice');
+          //            this.emitter.emit('begin_round');
+          //          }, this);
         }
       });
     }
@@ -150,6 +150,50 @@ class PlayScene extends Phaser.Scene {
     //    if (TEST) {
     dealTween[0].play();
     //    }
+  }
+
+  placeCardsNice() {
+    gameParity.upperHandPlayer.sortHand();
+    gameParity.lowerHandPlayer.sortHand();
+
+    console.log('Upper hand ' + gameParity.upperHandPlayer.getHand());
+    console.log('Lower hand ' + gameParity.lowerHandPlayer.getHand());
+    console.log('Place cards nice 1')
+    if (gameParity.upperHandPlayer.getHand().length == 0) {
+      return;
+    }
+    console.log('Place cards nice 2')
+
+
+
+    let upperTween;
+    let lowerTween;
+    for (let i = 0; i < gameParity.upperHandPlayer.getHand().length; i++) {
+      upperTween = this.tweens.add({
+        targets: this.sprites_hash[gameParity.upperHandPlayer.getHand()[i]],
+        x: game.renderer.width / 2 -
+            2 * this.sprites_hash[gameParity.upperHandPlayer.getHand()[i]].width +
+            i * HAND_DIST_BETWEEN_CARDS,
+        y: HAND_DIST_FROM_HORISONTAL_BORDERS,
+        duration: SPEED / 2,
+        ease: 'Linear',
+        depth: i
+      });
+
+      lowerTween = this.tweens.add({
+        targets: this.sprites_hash[gameParity.lowerHandPlayer.getHand()[i]],
+        x: game.renderer.width / 2 -
+            2 * this.sprites_hash[gameParity.lowerHandPlayer.getHand()[i]].width +
+            i * HAND_DIST_BETWEEN_CARDS,
+        y: this.game.renderer.height - HAND_DIST_FROM_HORISONTAL_BORDERS,
+        duration: SPEED / 2,
+        ease: 'Linear',
+        depth: i
+      });
+    }
+//    upperTween.on('complete', () => {lowerTween.on('complete', () => {
+//                                this.emitter.emit('placed_cards_nice');
+//                              })});
   }
 
   showFront(card_id) {
