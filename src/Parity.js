@@ -1,6 +1,9 @@
 /**
+ * This file contains the game logic for Parity. There are also some classes
+ * common to all trick taking games with trump.
+ *
  * @author       Ola Wistedt <ola@witech.se>
- * @copyright    2020 Ola Wistedt.
+ * @copyright    2021 Ola Wistedt.
  * @license      {@link https://opensource.org/licenses/MIT|MIT License}
  */
 
@@ -35,10 +38,29 @@ cardColor =
   return card[0];
 }
 
+/**
+ * @classdesc
+ * A trick taking game player
+ *
+ * @class Player
+ * @constructor
+ *
+ * @param {class Judge} judge - The judge of game rules:
+ */
 class Player {
   constructor(judge) {
+    this.name = 'Unknown';
     this.hand = [];
     this.judge = judge;
+    this.tricks = [];
+  }
+
+  setName(n) {
+    this.name = n;
+  }
+
+  getName() {
+    return this.name;
   }
 
   /**
@@ -63,6 +85,18 @@ class Player {
   sortHand() {
     this.hand.sort();
     this.hand.reverse();
+  }
+
+  addTrick(trick) {
+    this.tricks.push(trick);
+  }
+
+  getNrOfTricks() {
+    return this.tricks.length;
+  }
+
+  clearTricks() {
+    this.tricks = [];
   }
 }
 
@@ -117,6 +151,15 @@ class Ai extends Player {
   }
 }
 
+/**
+ * @classdesc
+ * The judge
+ *
+ * @class Judge
+ * @extends Nothing
+ * @constructor
+ *
+ */
 class Judge {
   constructor() {
     this.dealer;
@@ -133,6 +176,8 @@ class Judge {
     this.eldest = eldest;
     this.leader = this.eldest;
     this.opponent = this.dealer;
+    this.leader.clearTricks();
+    this.opponent.clearTricks();
   }
 
   /**
@@ -143,8 +188,16 @@ class Judge {
     this.leadCard = card;
   }
 
+  getLeadCard() {
+    return this.leadCard;
+  }
+
   setOpponentCard(card) {
     this.opponentCard = card;
+  }
+
+  getOpponentCard() {
+    return this.opponentCard;
   }
 
   getPossibleCardsToPlay(player) {
@@ -162,16 +215,27 @@ class Judge {
     let tmp;
     tmp = this.opponent;
     this.opponent = this.leader;
-    this.leader = this.opponent;
+    this.leader = tmp;
   }
 }
 
+/**
+ * @classdesc
+ * The judge that can Parity game rules.
+ *
+ * @class JudgeParity
+ * @extends Judge
+ * @constructor
+ *
+ */
 class JudgeParity extends Judge {
   constructor() {
     super();
     this.high_joker;
     this.low_joker;
+    this.parity;
   }
+
   setTrump(color) {
     super.setTrump(color);
     if (color == 'h' || color == 'd') {
@@ -181,6 +245,10 @@ class JudgeParity extends Judge {
       this.high_joker = 'jk_b';
       this.low_joker = 'jk_r';
     }
+  }
+
+  setParity(p) {
+    this.parity = p;
   }
 
   /**
@@ -209,28 +277,23 @@ class JudgeParity extends Judge {
     return possible;
   }
 
+  // Side effect: Sets the leader of next round.
   getWinnerOfTrick() {
     if (cardColor(this.opponentCard) == cardColor(this.leadCard) &&
         cardValue(this.opponentCard) > cardValue(this.leadCard)) {
-      return this.opponent;
+      this.switchLeader();
     } else if (
         cardColor(this.opponentCard) == this.trump &&
         cardColor(this.leadCard) != this.trump) {
-      return this.opponent;
+      this.switchLeader();
     } else if (
         this.opponentCard == this.low_joker &&
         this.leadCard != this.high_joker) {
-      return this.opponent;
+      this.switchLeader();
     } else if (this.opponentCard == this.high_joker) {
-      return this.opponent;
-    } else {
-      return this.leader;
+      this.switchLeader();
     }
 
-    if (cardColor(this.opponent) != cardColor(this.leader) &&
-        cardColor(this.opponent) == this.trump) {
-      return this.opponent;
-    }
     return this.leader;
   }
 }
