@@ -155,7 +155,8 @@ class Ai extends Player {
     return card_id;
   }
 
-  // getCard2() chooses the highest valid card to play
+  // getCard2() chooses the highest valid card to play. If it isn't the leader.
+  // Play the highest card if it will win, otherwise play the lowest card.
   getCard2() {
     let card_id;
     if (this == this.judge.leader) {
@@ -324,6 +325,15 @@ class JudgeParity extends Judge {
   }
 }
 
+/**
+ * @classdesc
+ * The dealer
+ *
+ * @class Dealer
+ * @extends Nothing
+ * @constructor
+ *
+ */
 class Dealer {
   constructor(arrayOfPlayers) {
     this.arrayOfPlayers = arrayOfPlayers;
@@ -367,6 +377,15 @@ class Dealer {
   }
 }
 
+/**
+ * @classdesc
+ * The Parity dealer
+ *
+ * @class ParityDealer
+ * @extends Dealer
+ * @constructor
+ *
+ */
 class ParityDealer extends Dealer {
   constructor(arrayOfPlayers) {
     super(arrayOfPlayers);
@@ -381,6 +400,15 @@ class ParityDealer extends Dealer {
   }
 }
 
+/**
+ * @classdesc
+ * The game
+ *
+ * @class Game
+ * @extends Nothing
+ * @constructor
+ *
+ */
 class Game {
   constructor(judge) {
     this.judge = judge;
@@ -396,6 +424,15 @@ class Game {
   }
 }
 
+/**
+ * @classdesc
+ * The Parity game
+ *
+ * @class GameParity
+ * @extends Game
+ * @constructor
+ *
+ */
 class GameParity extends Game {
   constructor(judge) {
     super(judge);

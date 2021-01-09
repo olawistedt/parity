@@ -14,7 +14,8 @@ alert /** @type {import("../typings")} */
 
 'use strict';
 
-const SPEED = 0;
+// Use shift-F5 to reload program
+const SPEED = 30;
 const UPPER_HAND_IS_DEALER = -1;
 const LOWER_HAND_IS_DEALER = 1;
 const FRONT_FRAME = 0;
@@ -147,7 +148,7 @@ class PlayScene extends Phaser.Scene {
 
     console.log('Upper hand ' + gameParity.upperHandPlayer.getHand());
     console.log('Lower hand ' + gameParity.lowerHandPlayer.getHand());
-    
+
     if (gameParity.upperHandPlayer.getHand().length == 0) {
       return;
     }
@@ -159,7 +160,9 @@ class PlayScene extends Phaser.Scene {
       upperTween = this.tweens.add({
         targets: this.sprites_hash[gameParity.upperHandPlayer.getHand()[i]],
         x: game.renderer.width / 2 -
-            2 * this.sprites_hash[gameParity.upperHandPlayer.getHand()[i]].width +
+            2 *
+                this.sprites_hash[gameParity.upperHandPlayer.getHand()[i]]
+                    .width +
             i * HAND_DIST_BETWEEN_CARDS,
         y: HAND_DIST_FROM_HORISONTAL_BORDERS,
         duration: SPEED / 2,
@@ -170,7 +173,9 @@ class PlayScene extends Phaser.Scene {
       lowerTween = this.tweens.add({
         targets: this.sprites_hash[gameParity.lowerHandPlayer.getHand()[i]],
         x: game.renderer.width / 2 -
-            2 * this.sprites_hash[gameParity.lowerHandPlayer.getHand()[i]].width +
+            2 *
+                this.sprites_hash[gameParity.lowerHandPlayer.getHand()[i]]
+                    .width +
             i * HAND_DIST_BETWEEN_CARDS,
         y: this.game.renderer.height - HAND_DIST_FROM_HORISONTAL_BORDERS,
         duration: SPEED / 2,
@@ -178,9 +183,9 @@ class PlayScene extends Phaser.Scene {
         depth: i
       });
     }
-//    upperTween.on('complete', () => {lowerTween.on('complete', () => {
-//                                this.emitter.emit('placed_cards_nice');
-//                              })});
+    //    upperTween.on('complete', () => {lowerTween.on('complete', () => {
+    //                                this.emitter.emit('placed_cards_nice');
+    //                              })});
   }
 
   showFront(card_id) {
