@@ -4,9 +4,11 @@ const parity = require('./Parity');
 function play() {
   gameParity.upperHandPlayer.setName('Computer');
   gameParity.lowerHandPlayer.setName('Ola');
+  gameParity.lowerHandPlayer.setAiLevel(2);
 
   let sum_ai = 0;
   let sum_pl = 0;
+  let turn = 0;
 
   // Play a partie.
   // Game is 100 points. The loser is lurched (skunked) for failing to reach 67
@@ -55,11 +57,17 @@ function play() {
     } else {
       sum_pl += 1;
     }
+    turn += 1;
 
-    if (sum_ai % 100000 == 0) {
+    if (turn % 10000 == 0) {
       console.log(
           gameParity.upperHandPlayer.getName() + ' ' + sum_ai + ' : ' +
           gameParity.lowerHandPlayer.getName() + ' ' + sum_pl)
+    }
+
+    if (turn % 100000 == 0) {
+      console.log('Ratio: ' + sum_pl / turn);
+      return;
     }
 
     // Switch dealer

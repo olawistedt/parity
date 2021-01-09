@@ -120,6 +120,7 @@ class Ai extends Player {
     super(judge);
     this.level = level;
   }
+
   getCard() {
     switch (this.level) {
       case 1:
@@ -129,6 +130,10 @@ class Ai extends Player {
       case 3:
         return this.getCard3();
     }
+  }
+
+  setAiLevel(nr) {
+    this.level = nr;
   }
 
   getTrump() {
@@ -146,6 +151,27 @@ class Ai extends Player {
     let possible = this.judge.getPossibleCardsToPlay(this);
     let rand_card_pos = Math.floor(Math.random() * possible.length);
     let card_id = possible[rand_card_pos];
+    this.removeCard(card_id);
+    return card_id;
+  }
+
+  // getCard2() chooses the highest valid card to play
+  getCard2() {
+    let card_id;
+    if (this == this.judge.leader) {
+      let possible = this.judge.getPossibleCardsToPlay(this);
+      possible = possible.sort().reverse();
+      card_id = possible[0];
+    } else {
+      let possible = this.judge.getPossibleCardsToPlay(this);
+      possible = possible.sort().reverse();
+      card_id = possible[0];
+      if (cardValue(this.judge.leadCard) > cardValue(card_id)) {
+        // Play a lower card if possible
+        possible.reverse();
+        card_id = possible[0];
+      }
+    }
     this.removeCard(card_id);
     return card_id;
   }
@@ -167,7 +193,7 @@ class Judge {
     this.opponent;
     this.leader;
     this.trump;
-    this.leaderCard;
+    this.leadCard;
     this.opponentCard;
   }
 
