@@ -48,6 +48,11 @@ class Player {
     this.hand.push(card_id);
   }
 
+  removeCard(card_id) {
+    let index = this.hand.indexOf(card_id);
+    this.hand.splice(index, 1);
+  }
+
   /**
    * @returns {Array} an array of cards that this player owns.
    */
@@ -102,10 +107,13 @@ class Ai extends Player {
     return a[Math.floor(Math.random() * a.length)];
   }
 
+  // getCard1() chooses a random valid card to play
   getCard1() {
     let possible = this.judge.getPossibleCardsToPlay(this);
-    let rand_card = Math.floor(Math.random() * possible.length);
-    return possible[rand_card];
+    let rand_card_pos = Math.floor(Math.random() * possible.length);
+    let card_id = possible[rand_card_pos];
+    this.removeCard(card_id);
+    return card_id;
   }
 }
 
@@ -156,10 +164,64 @@ class Judge {
     this.opponent = this.leader;
     this.leader = this.opponent;
   }
+}
+
+class JudgeParity extends Judge {
+  constructor() {
+    super();
+    this.high_joker;
+    this.low_joker;
+  }
+  setTrump(color) {
+    super.setTrump(color);
+    if (color == 'h' || color == 'd') {
+      this.high_joker = 'jk_r';
+      this.low_joker = 'jk_b';
+    } else {
+      this.high_joker = 'jk_b';
+      this.low_joker = 'jk_r';
+    }
+  }
+
+  /**
+   *
+   * @param {Array} player : The cards for this player
+   */
+  getPossibleCardsToPlay(player) {
+    if (player == this.leader) {
+      return player.hand;
+    }
+
+    let possible = [];
+
+    // Same suit
+    player.hand.forEach(e => {
+      if (cardColor(e) == cardColor(this.leadCard)) {
+        possible.push(e);
+      }
+    });
+
+    // Any card can be played
+    if (possible.length == 0) {
+      possible = player.hand;
+    }
+
+    return possible;
+  }
 
   getWinnerOfTrick() {
-    if (cardColor(this.opponent) == cardColor(this.leader) &&
-        cardValue(this.opponent) > cardValue(this.leader)) {
+    if (cardColor(this.opponentCard) == cardColor(this.leadCard) &&
+        cardValue(this.opponentCard) > cardValue(this.leadCard)) {
+      return this.opponent;
+    } else if (
+        cardColor(this.opponentCard) == this.trump &&
+        cardColor(this.leadCard) != this.trump) {
+      return this.opponent;
+    } else if (
+        this.opponentCard == this.low_joker &&
+        this.leadCard != this.high_joker) {
+      return this.opponent;
+    } else if (this.opponentCard == this.high_joker) {
       return this.opponent;
     } else {
       return this.leader;
@@ -170,35 +232,6 @@ class Judge {
       return this.opponent;
     }
     return this.leader;
-  }
-}
-
-class JudgeParity extends Judge {
-  constructor() {
-    super();
-  }
-  /**
-   *
-   * @param {Array} player : The cards for this player
-   */
-  getPossibleCardsToPlay(player) {
-    if (player == this.leader) {
-      return player.hand;
-    }
-
-    // You must follow suite if possible
-    let possible = [];
-    player.hand.forEach(e => {
-      if (cardColor(e) == cardColor(this.leadCard)) {
-        possible.push(e);
-      }
-    });
-
-    if (possible == []) {
-      possible = player.hand;
-    }
-
-    return possible;
   }
 }
 
@@ -281,31 +314,9 @@ class GameParity extends Game {
     let a = [this.upperHandPlayer, this.lowerHandPlayer];
     this.dealer = new ParityDealer(a);
   }
-
-  play() {
-    //    while(true) {
-    let dealOrder = this.dealer.randomDealer();
-    this.judge.init(dealOrder[0], dealOrder[1]);
-    this.dealer.shuffle();
-    this.dealer.deal();
-    this.upperHandPlayer.sortHand();
-    this.lowerHandPlayer.sortHand();
-    console.log('Upper hand ' + this.upperHandPlayer.getHand());
-    console.log('Lower hand ' + this.lowerHandPlayer.getHand());
-    this.judge.trump = this.judge.leader.getTrump();
-    this.judge.parity = this.judge.opponent.getParity();
-    for (let i = 0; i < 15; i++) {
-      this.judge.setLeadCard(this.judge.leader.getCard());
-      this.judge.setOpponentCard(this.judge.opponent.getCard());
-
-      let winningPlayer = this.judge.getWinnerOfTrick();
-      //      this.judge.addTrickToPlayer(winningPlayer);
-    }
-    //    }
-  }
 }
 
-// Uncomment these to run without GUI
+// These global variables is used by the GUI and command line versions of
+// Parity.
 judgeParity = new JudgeParity();
 gameParity = new GameParity(judgeParity);
-//gameParity.play();

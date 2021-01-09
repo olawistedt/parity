@@ -33,7 +33,6 @@ class PlayScene extends Phaser.Scene {
   }
 
   init(data) {
-    this.upper_hand_ids = [];
     this.lower_hand_ids = [];
   }
 
@@ -55,23 +54,21 @@ class PlayScene extends Phaser.Scene {
     // Talk to the game engine ends
 
 
+    //
+    // Place the deck
+    //
     for (let i = CARD_PARITY_IDS.length - 1; i > -1; i--) {
       let card_id = gameParity.dealer.deck[i];
-
 
       this.sprites_hash[card_id] = this.add.sprite(
           -1000, -1000,
           'back');  // Create sprites, and display them outside the screen.
-
-
 
       this.sprites_hash[card_id].setX(
           70 + (CARD_PARITY_IDS.length - i) / 3);  // x value
       this.sprites_hash[card_id].setY(
           this.game.renderer.height / 2 + (CARD_PARITY_IDS.length - i) / 3 +
           200);  // y value}
-
-
 
       this.anims.create({
         key: 'anim_key_' + card_id,
@@ -84,16 +81,11 @@ class PlayScene extends Phaser.Scene {
     this.deal();
   }
 
-
-
   /////////////////////////////////////////////////////////////////////
-  // Deal the 12 cards to the upper and lower hand when the top card is
-  // pressed.
+  // Deal the 30 cards to the upper and lower hand.
   /////////////////////////////////////////////////////////////////////
   deal() {
     let dealTween = [];
-    //    let top_card_id;
-    //    for (let i = 0; i < CARD_PARITY_IDS.length; i++) {
     for (let i = CARD_PARITY_IDS.length - 1; i > -1; i--) {
       let card_id = gameParity.dealer.deck[i];
 
@@ -102,7 +94,6 @@ class PlayScene extends Phaser.Scene {
            gameParity.upperHandPlayer == gameParity.dealer.current_dealer) ||
           (i % 2 == 0 &&
            gameParity.lowerHandPlayer == gameParity.dealer.current_dealer)) {
-        this.upper_hand_ids.push(card_id);
         y_base = HAND_DIST_FROM_HORISONTAL_BORDERS;
       } else {
         this.lower_hand_ids.push(card_id);
@@ -160,7 +151,6 @@ class PlayScene extends Phaser.Scene {
     if (gameParity.upperHandPlayer.getHand().length == 0) {
       return;
     }
-
 
 
     let upperTween;
