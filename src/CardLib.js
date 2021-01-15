@@ -64,3 +64,21 @@ function preloadCards(scene) {
   scene.load.image('s13', 'assets/cards/white_s_k.svg');
   scene.load.image('s14', 'assets/cards/white_s_a.svg');
 }
+
+function colorFullName(e) {
+  let color;
+  switch (e) {
+    case 'c':
+      color = 'CLUBS';
+      break;
+    case 'd':
+      color = 'DIAMONDS';
+      break;
+    case 'h':
+      color = 'HEARTS';
+      break;
+    case 's':
+      color = 'SPADES';
+  }
+  return color;
+}

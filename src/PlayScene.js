@@ -15,7 +15,7 @@ alert /** @type {import("../typings")} */
 'use strict';
 
 // Use shift-F5 to reload program
-const SPEED = 300;
+const SPEED = 0;
 const UPPER_HAND_IS_DEALER = -1;
 const LOWER_HAND_IS_DEALER = 1;
 const FRONT_FRAME = 0;
@@ -47,15 +47,26 @@ class PlayScene extends Phaser.Scene {
         0, 0, this.game.renderer.width * 2, this.game.renderer.height * 2,
         'cloth');  // Add the background
 
+    this.trumpText = this.add
+                         .text(
+                             this.game.renderer.width / 2,
+                             this.game.renderer.height / 2, '#Placeholder#', {
+                               fontFamily: '"Arial"',
+                               fontSize: '40px',
+                               depth: 100
+                               //                  backgroundColor: '#0'
+                             })
+                         .setOrigin(0.5)
+                         .setVisible(false);
 
     // Talk to the game engine begins
-    let dealOrder = gameParity.dealer.randomDealer();
-    gameParity.judge.init(dealOrder[0], dealOrder[1]);
-    gameParity.dealer.shuffle();
-    gameParity.upperHandPlayer.setName('Computer');
-    gameParity.lowerHandPlayer.setName('Ola');
+    let dealOrder = globalGameParity.dealer.randomDealer();
+    globalGameParity.judge.init(dealOrder[0], dealOrder[1]);
+    globalGameParity.dealer.shuffle();
+    globalGameParity.upperHandPlayer.setName('Computer');
+    globalGameParity.lowerHandPlayer.setName('Ola');
     let deck_pos;
-    if(gameParity.dealer.current_dealer == gameParity.lowerHandPlayer) {
+    if (globalGameParity.dealer.current_dealer == globalGameParity.lowerHandPlayer) {
       deck_pos = 1;
     } else {
       deck_pos = -1;
@@ -67,7 +78,7 @@ class PlayScene extends Phaser.Scene {
     // Place the deck
     //
     for (let i = CARD_PARITY_IDS.length - 1; i > -1; i--) {
-      let card_id = gameParity.dealer.deck[i];
+      let card_id = globalGameParity.dealer.deck[i];
 
       this.sprites_hash[card_id] = this.add.sprite(
           -1000, -1000,
@@ -91,18 +102,18 @@ class PlayScene extends Phaser.Scene {
   }
 
   /////////////////////////////////////////////////////////////////////
-  // Deal the 30 cards to the upper and lower hand.
+  // Deal the 30 cards to the upper and lower hands.
   /////////////////////////////////////////////////////////////////////
   deal() {
     let dealTween = [];
     for (let i = CARD_PARITY_IDS.length - 1; i > -1; i--) {
-      let card_id = gameParity.dealer.deck[i];
+      let card_id = globalGameParity.dealer.deck[i];
 
       let y_base = 0;
       if ((i % 2 != 0 &&
-           gameParity.upperHandPlayer == gameParity.dealer.current_dealer) ||
+           globalGameParity.upperHandPlayer == globalGameParity.dealer.current_dealer) ||
           (i % 2 == 0 &&
-           gameParity.lowerHandPlayer == gameParity.dealer.current_dealer)) {
+           globalGameParity.lowerHandPlayer == globalGameParity.dealer.current_dealer)) {
         y_base = HAND_DIST_FROM_HORISONTAL_BORDERS;
       } else {
         this.lower_hand_ids.push(card_id);
@@ -136,13 +147,14 @@ class PlayScene extends Phaser.Scene {
             this.showFront(e);
           });
 
-          gameParity.dealer.deal();
+          globalGameParity.dealer.deal();
 
           this.placeCardsNice();
           //          this.emitter.on('placed_cards_nice', () => {
           //            this.emitter.off('placed_cards_nice');
           //            this.emitter.emit('begin_round');
           //          }, this);
+          this.decideTrumpAndParity();
         }
       });
     }
@@ -150,29 +162,29 @@ class PlayScene extends Phaser.Scene {
   }
 
   placeCardsNice() {
-    gameParity.upperHandPlayer.sortHand();
-    gameParity.lowerHandPlayer.sortHand();
+    globalGameParity.upperHandPlayer.sortHand();
+    globalGameParity.lowerHandPlayer.sortHand();
 
     console.log(
-        'Upper hand ' + gameParity.upperHandPlayer.getName() + ' ' +
-        gameParity.upperHandPlayer.getHand());
+        'Upper hand ' + globalGameParity.upperHandPlayer.getName() + ' ' +
+        globalGameParity.upperHandPlayer.getHand());
     console.log(
-        'Lower hand ' + gameParity.lowerHandPlayer.getName() + ' ' +
-        gameParity.lowerHandPlayer.getHand());
+        'Lower hand ' + globalGameParity.lowerHandPlayer.getName() + ' ' +
+        globalGameParity.lowerHandPlayer.getHand());
 
-    if (gameParity.upperHandPlayer.getHand().length == 0) {
+    if (globalGameParity.upperHandPlayer.getHand().length == 0) {
       return;
     }
 
 
     let upperTween;
     let lowerTween;
-    for (let i = 0; i < gameParity.upperHandPlayer.getHand().length; i++) {
+    for (let i = 0; i < globalGameParity.upperHandPlayer.getHand().length; i++) {
       upperTween = this.tweens.add({
-        targets: this.sprites_hash[gameParity.upperHandPlayer.getHand()[i]],
+        targets: this.sprites_hash[globalGameParity.upperHandPlayer.getHand()[i]],
         x: game.renderer.width / 2 -
             2 *
-                this.sprites_hash[gameParity.upperHandPlayer.getHand()[i]]
+                this.sprites_hash[globalGameParity.upperHandPlayer.getHand()[i]]
                     .width +
             i * HAND_DIST_BETWEEN_CARDS,
         y: HAND_DIST_FROM_HORISONTAL_BORDERS,
@@ -182,10 +194,10 @@ class PlayScene extends Phaser.Scene {
       });
 
       lowerTween = this.tweens.add({
-        targets: this.sprites_hash[gameParity.lowerHandPlayer.getHand()[i]],
+        targets: this.sprites_hash[globalGameParity.lowerHandPlayer.getHand()[i]],
         x: game.renderer.width / 2 -
             2 *
-                this.sprites_hash[gameParity.lowerHandPlayer.getHand()[i]]
+                this.sprites_hash[globalGameParity.lowerHandPlayer.getHand()[i]]
                     .width +
             i * HAND_DIST_BETWEEN_CARDS,
         y: this.game.renderer.height - HAND_DIST_FROM_HORISONTAL_BORDERS,
@@ -207,6 +219,25 @@ class PlayScene extends Phaser.Scene {
       this.sprites_hash[card_id].anims.setCurrentFrame(frame);
     } catch (err) {
       console.log(err);
+    }
+  }
+
+  decideTrumpAndParity() {
+    globalGameParity.judge.setTrump(globalGameParity.judge.leader.getTrump());
+    globalGameParity.judge.setParity(globalGameParity.judge.opponent.getParity());
+
+    if (globalGameParity.judge.dealer == globalGameParity.upperHandPlayer) {
+      let trump = globalGameParity.upperHandPlayer.getTrump();
+      this.trumpText.setText('AI NOMINATES THE TRUMP SUIT ' + colorFullName(trump));
+      this.trumpText.setVisible(true);
+      globalGameParity.judge.setTrump(trump);
+      console.log('Upper hand chooses trump ' + trump);
+    } else {
+      let trump;
+      this.trumpText.setText('NOMINATE THE TRUMP SUIT');
+      this.trumpText.setVisible(true);
+      globalGameParity.judge.setTrump(trump);
+      console.log('Lower hand chooses trump ' + trump);
     }
   }
 

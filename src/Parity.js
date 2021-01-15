@@ -463,5 +463,5 @@ class GameParity extends Game {
 
 // These global variables is used by the GUI and command line versions of
 // Parity.
-judgeParity = new JudgeParity();
-gameParity = new GameParity(judgeParity);
+globalJudgeParity = new JudgeParity();
+globalGameParity = new GameParity(globalJudgeParity);
