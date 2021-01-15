@@ -172,6 +172,17 @@ class Ai extends Player {
         possible.reverse();
         card_id = possible[0];
       }
+
+      // Play a low trump if possible.
+      let trumps = [];
+      possible.forEach(e => {
+        if (cardColor(e) == this.judge.trump) {
+          trumps.push(e);
+        }
+      });
+      if (trumps.length != 0) {
+        card_id = trumps.sort()[0];
+      }
     }
     this.removeCard(card_id);
     return card_id;
@@ -352,6 +363,12 @@ class Dealer {
     return b;
   }
 
+  nextDealer() {
+    let index_current_dealer = this.arrayOfPlayers.indexOf(this.current_dealer);
+    let next_dealer_index = (index_current_dealer + 1) % this.arrayOfPlayers.length;
+    this.current_dealer = this.arrayOfPlayers[next_dealer_index]
+  }
+
   /**
    *
    * @param {number} similar : How many cards to deal at a time.
@@ -361,8 +378,10 @@ class Dealer {
     assert(
         similar == 1, 'No support for deal more than one card at a time yet.');
 
+    let index_current_dealer = this.arrayOfPlayers.indexOf(this.current_dealer);
+
     for (let i = 0; i < total * this.arrayOfPlayers.length; i++) {
-      this.arrayOfPlayers[i % 2].addCard(this.deck.shift());
+      this.arrayOfPlayers[(i + index_current_dealer + 1) % this.arrayOfPlayers.length].addCard(this.deck.shift());
     }
   }
 

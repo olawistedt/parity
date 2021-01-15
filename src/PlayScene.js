@@ -15,7 +15,7 @@ alert /** @type {import("../typings")} */
 'use strict';
 
 // Use shift-F5 to reload program
-const SPEED = 30;
+const SPEED = 300;
 const UPPER_HAND_IS_DEALER = -1;
 const LOWER_HAND_IS_DEALER = 1;
 const FRONT_FRAME = 0;
@@ -52,6 +52,14 @@ class PlayScene extends Phaser.Scene {
     let dealOrder = gameParity.dealer.randomDealer();
     gameParity.judge.init(dealOrder[0], dealOrder[1]);
     gameParity.dealer.shuffle();
+    gameParity.upperHandPlayer.setName('Computer');
+    gameParity.lowerHandPlayer.setName('Ola');
+    let deck_pos;
+    if(gameParity.dealer.current_dealer == gameParity.lowerHandPlayer) {
+      deck_pos = 1;
+    } else {
+      deck_pos = -1;
+    }
     // Talk to the game engine ends
 
 
@@ -69,7 +77,7 @@ class PlayScene extends Phaser.Scene {
           70 + (CARD_PARITY_IDS.length - i) / 3);  // x value
       this.sprites_hash[card_id].setY(
           this.game.renderer.height / 2 + (CARD_PARITY_IDS.length - i) / 3 +
-          200);  // y value}
+          deck_pos * 200);  // y value}
 
       this.anims.create({
         key: 'anim_key_' + card_id,
@@ -138,7 +146,6 @@ class PlayScene extends Phaser.Scene {
         }
       });
     }
-
     dealTween[0].play();
   }
 
@@ -146,8 +153,12 @@ class PlayScene extends Phaser.Scene {
     gameParity.upperHandPlayer.sortHand();
     gameParity.lowerHandPlayer.sortHand();
 
-    console.log('Upper hand ' + gameParity.upperHandPlayer.getHand());
-    console.log('Lower hand ' + gameParity.lowerHandPlayer.getHand());
+    console.log(
+        'Upper hand ' + gameParity.upperHandPlayer.getName() + ' ' +
+        gameParity.upperHandPlayer.getHand());
+    console.log(
+        'Lower hand ' + gameParity.lowerHandPlayer.getName() + ' ' +
+        gameParity.lowerHandPlayer.getHand());
 
     if (gameParity.upperHandPlayer.getHand().length == 0) {
       return;

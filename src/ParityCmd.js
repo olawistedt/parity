@@ -71,9 +71,7 @@ function play() {
     }
 
     // Switch dealer
-    let tmp = dealOrder[0];
-    dealOrder[0] = dealOrder[1];
-    dealOrder[1] = tmp;
+    gameParity.dealer.nextDealer();
   }
 }
 
