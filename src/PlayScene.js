@@ -61,7 +61,7 @@ class PlayScene extends Phaser.Scene {
                                fontFamily: '"Arial"',
                                fontSize: '40px',
                                depth: 100
-                               //                  backgroundColor: '#0'
+                               // backgroundColor: '#0'
                              })
                          .setOrigin(0.5)
                          .setVisible(false);
@@ -80,7 +80,6 @@ class PlayScene extends Phaser.Scene {
       deck_pos = -1;
     }
     // Talk to the game engine ends
-
 
     //
     // Place the deck
@@ -160,13 +159,9 @@ class PlayScene extends Phaser.Scene {
           globalGameParity.dealer.deal();
 
           this.placeCardsNice();
-          //          this.emitter.on('placed_cards_nice', () => {
-          //            this.emitter.off('placed_cards_nice');
-          //            this.emitter.emit('begin_round');
-          //          }, this);
           // this.decideTrumpAndParity();
-          this.playCards();
-
+          this.playCards();  // Just for test this.decideTrumpAndParity()
+                             // should be done here.
         }
       });
     }
@@ -187,7 +182,6 @@ class PlayScene extends Phaser.Scene {
     if (globalGameParity.upperHandPlayer.getHand().length == 0) {
       return;
     }
-
 
     let upperTween;
     let lowerTween;
@@ -222,20 +216,6 @@ class PlayScene extends Phaser.Scene {
         ease: 'Linear',
         depth: i
       });
-    }
-    //    upperTween.on('complete', () => {lowerTween.on('complete', () => {
-    //                                this.emitter.emit('placed_cards_nice');
-    //                              })});
-  }
-
-  showFront(card_id) {
-    let anim = this.anims_hash[card_id];
-    let frame;
-    try {
-      frame = anim.getFrameAt(FRONT_FRAME);
-      this.sprites_hash[card_id].anims.setCurrentFrame(frame);
-    } catch (err) {
-      console.log(err);
     }
   }
 
@@ -356,59 +336,146 @@ class PlayScene extends Phaser.Scene {
   }
 
   playCards() {
-//    for(let i = 0; i < 15; i++) {
-      if(globalGameParity.judge.leader == globalGameParity.upperHandPlayer) {
+    if (globalGameParity.judge.leader == globalGameParity.upperHandPlayer) {
+      // Play upper hand to table
+      let upper_hand_card = globalGameParity.judge.leader.getCard();
+      globalGameParity.judge.setLeadCard(upper_hand_card);
+      let ai_sprite = this.sprites_hash[upper_hand_card];
+      let playUpperToTable = this.tweens.add({
+        targets: ai_sprite,
+        y: this.game.renderer.height / 2,
+        x: this.game.renderer.width / 2 +
+            40 * -1,  // Place the card to the left
+        duration: SPEED * 3,
+        ease: 'Linear',
+        depth: 0  // Depth 0 is set for the bottom card
+      });
 
-        // Play upper hand to table
-        let upper_hand_card = globalGameParity.judge.leader.getCard();
-        globalGameParity.judge.setLeadCard(upper_hand_card);
-        let ai_sprite = this.sprites_hash[upper_hand_card];
-        let playUpperToTable = this.tweens.create({
-          targets: ai_sprite,
-          y: this.game.renderer.height / 2,
-          x: this.game.renderer.width / 2 + 40 * -1, // Place the card to the left
-          duration: SPEED * 3,
-          ease: 'Linear',
-          depth: 1 + -1 // Depth 0 is set for the bottom card
+      this.showFront(upper_hand_card);
+      playUpperToTable.on('complete', () => {
+        console.log('Time to play the user card.');
+        this.lower_hand_ids.forEach(e => {
+          let s = this.sprites_hash[e];
+          s.setInteractive();
         });
-    
-        this.showFront(upper_hand_card);
-        playUpperToTable.play(); // Play the tween
-        playUpperToTable.on('complete', () => {
-          console.log('Time to play the user card.')
-        });
-      } else {
-        // Play lower hand to table
+      });
+    } else {
+      // Play lower hand to table
+      this.lower_hand_ids.forEach(e => {
+        let s = this.sprites_hash[e];
+        s.setInteractive();
+      });
+    }
+  }
 
-      }
-      // let lCard = globalGameParity.judge.leader.getCard();
-      // globalGameParity.judge.setLeadCard(lCard);
-      // let oCard = globalGameParity.judge.opponent.getCard();
-      // globalGameParity.judge.setOpponentCard(oCard);
-//}
-
+  playUpperHandAfterLowerHand() {
+    // Play upper hand to table
+    let upper_hand_card = globalGameParity.judge.opponent.getCard();
+    globalGameParity.judge.setOpponentCard(upper_hand_card);
+    let ai_sprite = this.sprites_hash[upper_hand_card];
+    let playUpperToTable = this.tweens.add({
+      targets: ai_sprite,
+      y: this.game.renderer.height / 2,
+      x: this.game.renderer.width / 2 + 40 * 1,  // Place the card to the left
+      duration: SPEED * 3,
+      ease: 'Linear',
+      depth: 2  // Depth 1 is set for the top card
+    });
+    playUpperToTable.on('complete', () => {
+      this.getTrick();
+    });
+    this.showFront(ai_sprite.name)
   }
 
   cardIsPressed(sprite) {
     console.log('Pointer down on card ' + sprite.name);
-    if( globalGameParity.lowerHandPlayer.getCard(sprite.name) ) {
-      let playLowerToTable = this.tweens.create({
+    if (globalGameParity.lowerHandPlayer.getCard(sprite.name)) {
+      if (globalGameParity.judge.leader == globalGameParity.lowerHandPlayer) {
+        globalGameParity.judge.setLeadCard(sprite.name);
+      } else {
+        globalGameParity.judge.setOpponentCard(sprite.name);
+      }
+      let playLowerToTable = this.tweens.add({
         targets: sprite,
         y: this.game.renderer.height / 2,
         x: this.game.renderer.width / 2,
         duration: SPEED * 3,
         ease: 'Linear',
-        depth: 1 + 1
+        depth: 1
       });
 
-      playLowerToTable.play();
       this.lower_hand_ids.forEach(e => {
         let s = this.sprites_hash[e];
         s.disableInteractive();
       });
 
+      playLowerToTable.on('complete', () => {
+        if (globalGameParity.judge.leader ==
+            globalGameParity.lowerHandPlayer) {
+          this.playUpperHandAfterLowerHand();
+        } else {
+          this.getTrick();
+        }
+      });
+    }
+  }
+
+  getTrick() {
+    let winningPlayer = globalGameParity.judge.getWinnerOfTrick();
+    winningPlayer.addTrick([
+      globalGameParity.judge.getLeadCard(),
+      globalGameParity.judge.getOpponentCard()
+    ]);
+    this.showBack(globalGameParity.judge.getLeadCard());
+    this.showBack(globalGameParity.judge.getOpponentCard());
+    let winner_y;
+    if (winningPlayer == globalGameParity.upperHandPlayer) {
+      winner_y = TRICKS_FROM_HORISONTAL_BORDER +
+          20 * globalGameParity.upperHandPlayer.getNrOfTricks();
+    } else {
+      winner_y = this.game.renderer.height - TRICKS_FROM_HORISONTAL_BORDER -
+          20 * globalGameParity.lowerHandPlayer.getNrOfTricks();
     }
 
+    let timer = this.time.delayedCall(SPEED * 4, () => {
+      let getTrick = this.tweens.add({
+        targets: [
+          this.sprites_hash[globalGameParity.judge.leadCard],
+          this.sprites_hash[globalGameParity.judge.opponentCard]
+        ],
+        x: this.game.renderer.width - 150,
+        y: winner_y,
+        duration: SPEED * 3,
+        ease: 'Linear',
+        depth: 1,
+        angle: 90
+      });
+      //    getTrick.play();
+      getTrick.on('complete', () => {
+        this.playCards();
+      });
+    });
+  }
 
+  showFront(card_id) {
+    let anim = this.anims_hash[card_id];
+    let frame;
+    try {
+      frame = anim.getFrameAt(FRONT_FRAME);
+      this.sprites_hash[card_id].anims.setCurrentFrame(frame);
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
+  showBack(card_id) {
+    let anim = this.anims_hash[card_id];
+    let frame;
+    try {
+      frame = anim.getFrameAt(BACK_FRAME);
+      this.sprites_hash[card_id].anims.setCurrentFrame(frame);
+    } catch (err) {
+      console.log(err);
+    }
   }
 }
