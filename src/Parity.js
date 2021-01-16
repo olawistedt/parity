@@ -191,6 +191,32 @@ class Ai extends Player {
 
 /**
  * @classdesc
+ * The artificial intelligence
+ *
+ * Tries to play as smart as Ola Wistedt can program it.
+ *
+ * @class Human
+ * @extends Player
+ * @constructor
+ *
+ */
+class Human extends Player {
+  constructor(judge) {
+    super(judge);
+  }
+
+  getCard(card_id) {
+    let possible = this.judge.getPossibleCardsToPlay(this);
+    if (!possible.includes(card_id)) {
+      return false;
+    }
+    this.removeCard(card_id);
+    return true;
+  }
+}
+
+/**
+ * @classdesc
  * The judge
  *
  * @class Judge
@@ -364,8 +390,10 @@ class Dealer {
   }
 
   nextDealer() {
-    let index_current_dealer = this.arrayOfPlayers.indexOf(this.current_dealer);
-    let next_dealer_index = (index_current_dealer + 1) % this.arrayOfPlayers.length;
+    let index_current_dealer =
+        this.arrayOfPlayers.indexOf(this.current_dealer);
+    let next_dealer_index =
+        (index_current_dealer + 1) % this.arrayOfPlayers.length;
     this.current_dealer = this.arrayOfPlayers[next_dealer_index]
   }
 
@@ -378,10 +406,12 @@ class Dealer {
     assert(
         similar == 1, 'No support for deal more than one card at a time yet.');
 
-    let index_current_dealer = this.arrayOfPlayers.indexOf(this.current_dealer);
+    let index_current_dealer =
+        this.arrayOfPlayers.indexOf(this.current_dealer);
 
     for (let i = 0; i < total * this.arrayOfPlayers.length; i++) {
-      this.arrayOfPlayers[(i + index_current_dealer + 1) % this.arrayOfPlayers.length].addCard(this.deck.shift());
+      this.arrayOfPlayers[(i + index_current_dealer + 1) % this.arrayOfPlayers.length]
+          .addCard(this.deck.shift());
     }
   }
 
@@ -433,11 +463,6 @@ class Game {
     this.judge = judge;
   }
 
-  initPartie() {
-    this.upperHandPlayer = new Ai(1, this.judge);
-    this.lowerHandPlayer = new Ai(1, this.judge);
-  }
-
   singleDeal(similar, total) {
     this.dealer.deal(similar, total);
   }
@@ -453,9 +478,16 @@ class Game {
  *
  */
 class GameParity extends Game {
-  constructor(judge) {
+  constructor(nr_of_ai_players, judge) {
     super(judge);
-    super.initPartie();
+    this.nr_of_ai_players = nr_of_ai_players;
+    if (this.nr_of_ai_players == 1) {
+      this.upperHandPlayer = new Ai(1, this.judge);
+      this.lowerHandPlayer = new Human(this.judge);
+    } else {
+      this.upperHandPlayer = new Ai(1, this.judge);
+      this.lowerHandPlayer = new Ai(1, this.judge);
+    }
     let a = [this.upperHandPlayer, this.lowerHandPlayer];
     this.dealer = new ParityDealer(a);
   }
@@ -464,4 +496,6 @@ class GameParity extends Game {
 // These global variables is used by the GUI and command line versions of
 // Parity.
 globalJudgeParity = new JudgeParity();
-globalGameParity = new GameParity(globalJudgeParity);
+globalGameParity = new GameParity(1, globalJudgeParity);
+
+module.exports = GameParity;

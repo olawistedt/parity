@@ -164,7 +164,9 @@ class PlayScene extends Phaser.Scene {
           //            this.emitter.off('placed_cards_nice');
           //            this.emitter.emit('begin_round');
           //          }, this);
-          this.decideTrumpAndParity();
+          // this.decideTrumpAndParity();
+          this.playCards();
+
         }
       });
     }
@@ -259,7 +261,8 @@ class PlayScene extends Phaser.Scene {
         button_even.destroy();
         button_odd.destroy();
         this.trumpText.setVisible(false);
-        globalGameParity.judge.setParity(ODD)
+        globalGameParity.judge.setParity(ODD);
+        this.playCards();
       });
       let button_even = this.add.image(0, 0, 'button_even')
                             .setVisible(true)
@@ -271,7 +274,8 @@ class PlayScene extends Phaser.Scene {
         button_even.destroy();
         button_odd.destroy();
         this.trumpText.setVisible(false);
-        globalGameParity.judge.setParity(EVEN)
+        globalGameParity.judge.setParity(EVEN);
+        this.playCards();
       });
     } else {
       let trump;
@@ -302,6 +306,7 @@ class PlayScene extends Phaser.Scene {
             button_ok.on('pointerdown', () => {
               button_ok.destroy();
               this.trumpText.setVisible(false);
+              this.playCards();
             });
           }
 
@@ -350,7 +355,60 @@ class PlayScene extends Phaser.Scene {
     }
   }
 
-  cardIsPressed(s) {
-    console.log('Pointer down on card ' + s.name);
+  playCards() {
+//    for(let i = 0; i < 15; i++) {
+      if(globalGameParity.judge.leader == globalGameParity.upperHandPlayer) {
+
+        // Play upper hand to table
+        let upper_hand_card = globalGameParity.judge.leader.getCard();
+        globalGameParity.judge.setLeadCard(upper_hand_card);
+        let ai_sprite = this.sprites_hash[upper_hand_card];
+        let playUpperToTable = this.tweens.create({
+          targets: ai_sprite,
+          y: this.game.renderer.height / 2,
+          x: this.game.renderer.width / 2 + 40 * -1, // Place the card to the left
+          duration: SPEED * 3,
+          ease: 'Linear',
+          depth: 1 + -1 // Depth 0 is set for the bottom card
+        });
+    
+        this.showFront(upper_hand_card);
+        playUpperToTable.play(); // Play the tween
+        playUpperToTable.on('complete', () => {
+          console.log('Time to play the user card.')
+        });
+      } else {
+        // Play lower hand to table
+
+      }
+      // let lCard = globalGameParity.judge.leader.getCard();
+      // globalGameParity.judge.setLeadCard(lCard);
+      // let oCard = globalGameParity.judge.opponent.getCard();
+      // globalGameParity.judge.setOpponentCard(oCard);
+//}
+
+  }
+
+  cardIsPressed(sprite) {
+    console.log('Pointer down on card ' + sprite.name);
+    if( globalGameParity.lowerHandPlayer.getCard(sprite.name) ) {
+      let playLowerToTable = this.tweens.create({
+        targets: sprite,
+        y: this.game.renderer.height / 2,
+        x: this.game.renderer.width / 2,
+        duration: SPEED * 3,
+        ease: 'Linear',
+        depth: 1 + 1
+      });
+
+      playLowerToTable.play();
+      this.lower_hand_ids.forEach(e => {
+        let s = this.sprites_hash[e];
+        s.disableInteractive();
+      });
+
+    }
+
+
   }
 }
