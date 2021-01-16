@@ -331,6 +331,12 @@ class JudgeParity extends Judge {
       if (cardColor(e) == cardColor(this.leadCard)) {
         possible.push(e);
       }
+      if(cardColor(this.leadCard) == 'j' && cardColor(e) == 'j') {
+        possible.push(e);
+      }
+      if(cardColor(this.leadCard) == 'j' && cardColor(e) == this.trump) {
+        possible.push(e);
+      }
     });
 
     // Any card can be played

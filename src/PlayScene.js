@@ -54,18 +54,40 @@ class PlayScene extends Phaser.Scene {
         0, 0, this.game.renderer.width * 2, this.game.renderer.height * 2,
         'cloth');  // Add the background
 
-    this.trumpText = this.add
-                         .text(
-                             this.game.renderer.width / 2,
-                             this.game.renderer.height / 2, '#Placeholder#', {
-                               fontFamily: '"Arial"',
-                               fontSize: '40px',
-                               depth: 100
-                               // backgroundColor: '#0'
-                             })
-                         .setOrigin(0.5)
-                         .setVisible(false);
+    this.chooseTrumpAndParityText =
+        this.add
+            .text(
+                this.game.renderer.width / 2, this.game.renderer.height / 2,
+                '#Placeholder#', {
+                  fontFamily: '"Arial"',
+                  fontSize: '40px',
+                  depth: 100
+                  // backgroundColor: '#0'
+                })
+            .setOrigin(0.5)
+            .setVisible(false);
 
+    this.showTrumpText =
+        this.add
+            .text(this.game.renderer.width - 100, 25, 'Trump', {
+              fontFamily: '"Arial"',
+              fontSize: '12px',
+              depth: 100
+              // backgroundColor: '#0'
+            })
+            .setOrigin(0.5)
+            .setVisible(true);
+
+    this.showParityText =
+        this.add
+            .text(this.game.renderer.width - 100, 50, 'Parity', {
+              fontFamily: '"Arial"',
+              fontSize: '12px',
+              depth: 100
+              // backgroundColor: '#0'
+            })
+            .setOrigin(0.5)
+            .setVisible(true);
     // Talk to the game engine begins
     let dealOrder = globalGameParity.dealer.randomDealer();
     globalGameParity.judge.init(dealOrder[0], dealOrder[1]);
@@ -112,6 +134,7 @@ class PlayScene extends Phaser.Scene {
   // Deal the 30 cards to the upper and lower hands.
   /////////////////////////////////////////////////////////////////////
   deal() {
+    this.max_depth = 4;
     let dealTween = [];
     for (let i = CARD_PARITY_IDS.length - 1; i > -1; i--) {
       let card_id = globalGameParity.dealer.deck[i];
@@ -159,9 +182,8 @@ class PlayScene extends Phaser.Scene {
           globalGameParity.dealer.deal();
 
           this.placeCardsNice();
-          // this.decideTrumpAndParity();
-          this.playCards();  // Just for test this.decideTrumpAndParity()
-                             // should be done here.
+          this.decideTrumpAndParity();
+          //          this.playCards();
         }
       });
     }
@@ -171,13 +193,6 @@ class PlayScene extends Phaser.Scene {
   placeCardsNice() {
     globalGameParity.upperHandPlayer.sortHand();
     globalGameParity.lowerHandPlayer.sortHand();
-
-    console.log(
-        'Upper hand ' + globalGameParity.upperHandPlayer.getName() + ' ' +
-        globalGameParity.upperHandPlayer.getHand());
-    console.log(
-        'Lower hand ' + globalGameParity.lowerHandPlayer.getName() + ' ' +
-        globalGameParity.lowerHandPlayer.getHand());
 
     if (globalGameParity.upperHandPlayer.getHand().length == 0) {
       return;
@@ -220,18 +235,14 @@ class PlayScene extends Phaser.Scene {
   }
 
   decideTrumpAndParity() {
-    globalGameParity.judge.setTrump(globalGameParity.judge.leader.getTrump());
-    globalGameParity.judge.setParity(
-        globalGameParity.judge.opponent.getParity());
-
     if (globalGameParity.judge.dealer == globalGameParity.lowerHandPlayer) {
       let trump = globalGameParity.upperHandPlayer.getTrump();
-      this.trumpText.setText(
+      this.chooseTrumpAndParityText.setText(
           'AI NOMINATES THE TRUMP SUIT ' + colorFullName(trump) +
           '\n                   STATE ODD OR EVEN');
-      this.trumpText.setVisible(true);
+      this.chooseTrumpAndParityText.setVisible(true);
       globalGameParity.judge.setTrump(trump);
-      console.log('Upper hand chooses trump ' + trump);
+      //      console.log('Upper hand chooses trump ' + trump);
       let button_odd = this.add.image(0, 0, 'button_odd')
                            .setVisible(true)
                            .setY(this.game.renderer.height / 2 + 100)
@@ -240,8 +251,9 @@ class PlayScene extends Phaser.Scene {
       button_odd.on('pointerdown', () => {
         button_even.destroy();
         button_odd.destroy();
-        this.trumpText.setVisible(false);
+        this.chooseTrumpAndParityText.setVisible(false);
         globalGameParity.judge.setParity(ODD);
+        this.displayTrumpAndParity();
         this.playCards();
       });
       let button_even = this.add.image(0, 0, 'button_even')
@@ -253,14 +265,15 @@ class PlayScene extends Phaser.Scene {
       button_even.on('pointerdown', () => {
         button_even.destroy();
         button_odd.destroy();
-        this.trumpText.setVisible(false);
+        this.chooseTrumpAndParityText.setVisible(false);
         globalGameParity.judge.setParity(EVEN);
+        this.displayTrumpAndParity();
         this.playCards();
       });
     } else {
       let trump;
-      this.trumpText.setText('NOMINATE THE TRUMP SUIT');
-      this.trumpText.setVisible(true);
+      this.chooseTrumpAndParityText.setText('NOMINATE THE TRUMP SUIT');
+      this.chooseTrumpAndParityText.setVisible(true);
 
       // Common function for all cases when the user choose trump
       let pointerDownCommon =
@@ -273,9 +286,9 @@ class PlayScene extends Phaser.Scene {
             let parity = globalGameParity.judge.opponent.getParity();
             globalGameParity.judge.setParity(parity);
             if (parity == ODD) {
-              this.trumpText.setText('AI STATES ODD PARITY');
+              this.chooseTrumpAndParityText.setText('AI STATES ODD PARITY');
             } else {
-              this.trumpText.setText('AI STATES EVEN PARITY');
+              this.chooseTrumpAndParityText.setText('AI STATES EVEN PARITY');
             }
             let button_ok = this.add.image(0, 0, 'button_ok')
                                 .setVisible(true)
@@ -285,7 +298,8 @@ class PlayScene extends Phaser.Scene {
 
             button_ok.on('pointerdown', () => {
               button_ok.destroy();
-              this.trumpText.setVisible(false);
+              this.chooseTrumpAndParityText.setVisible(false);
+              this.displayTrumpAndParity();
               this.playCards();
             });
           }
@@ -331,11 +345,20 @@ class PlayScene extends Phaser.Scene {
       });
 
       globalGameParity.judge.setTrump(trump);
-      console.log('Lower hand chooses trump ' + trump);
+      //      console.log('Lower hand chooses trump ' + trump);
+    }
+  }
+
+  displayTrumpAndParity() {
+    if (globalGameParity.judge.parity == EVEN) {
+      this.showParityText.setText('EVEN');
+    } else {
+      this.showParityText.setText('ODD');
     }
   }
 
   playCards() {
+    this.showTrumpText.setText(colorFullName(globalGameParity.judge.trump));
     if (globalGameParity.judge.leader == globalGameParity.upperHandPlayer) {
       // Play upper hand to table
       let upper_hand_card = globalGameParity.judge.leader.getCard();
@@ -353,7 +376,7 @@ class PlayScene extends Phaser.Scene {
 
       this.showFront(upper_hand_card);
       playUpperToTable.on('complete', () => {
-        console.log('Time to play the user card.');
+        //        console.log('Time to play the user card.');
         this.lower_hand_ids.forEach(e => {
           let s = this.sprites_hash[e];
           s.setInteractive();
@@ -383,12 +406,13 @@ class PlayScene extends Phaser.Scene {
     });
     playUpperToTable.on('complete', () => {
       this.getTrick();
+      this.placeCardsNice();
     });
     this.showFront(ai_sprite.name)
   }
 
   cardIsPressed(sprite) {
-    console.log('Pointer down on card ' + sprite.name);
+    //    console.log('Pointer down on card ' + sprite.name);
     if (globalGameParity.lowerHandPlayer.getCard(sprite.name)) {
       if (globalGameParity.judge.leader == globalGameParity.lowerHandPlayer) {
         globalGameParity.judge.setLeadCard(sprite.name);
@@ -415,6 +439,7 @@ class PlayScene extends Phaser.Scene {
           this.playUpperHandAfterLowerHand();
         } else {
           this.getTrick();
+          this.placeCardsNice();
         }
       });
     }
@@ -428,6 +453,9 @@ class PlayScene extends Phaser.Scene {
     ]);
     this.showBack(globalGameParity.judge.getLeadCard());
     this.showBack(globalGameParity.judge.getOpponentCard());
+    console.log(
+        'Cards played: ' + globalGameParity.judge.getLeadCard() + ' : ' +
+        globalGameParity.judge.getOpponentCard())
     let winner_y;
     if (winningPlayer == globalGameParity.upperHandPlayer) {
       winner_y = TRICKS_FROM_HORISONTAL_BORDER +
@@ -437,6 +465,7 @@ class PlayScene extends Phaser.Scene {
           20 * globalGameParity.lowerHandPlayer.getNrOfTricks();
     }
 
+    this.max_depth++;
     let timer = this.time.delayedCall(SPEED * 4, () => {
       let getTrick = this.tweens.add({
         targets: [
@@ -447,7 +476,7 @@ class PlayScene extends Phaser.Scene {
         y: winner_y,
         duration: SPEED * 3,
         ease: 'Linear',
-        depth: 1,
+        depth: this.max_depth,
         angle: 90
       });
       //    getTrick.play();
@@ -464,7 +493,7 @@ class PlayScene extends Phaser.Scene {
       frame = anim.getFrameAt(FRONT_FRAME);
       this.sprites_hash[card_id].anims.setCurrentFrame(frame);
     } catch (err) {
-      console.log(err);
+      console.log('ERROR: showFront' + err);
     }
   }
 
@@ -475,7 +504,7 @@ class PlayScene extends Phaser.Scene {
       frame = anim.getFrameAt(BACK_FRAME);
       this.sprites_hash[card_id].anims.setCurrentFrame(frame);
     } catch (err) {
-      console.log(err);
+      console.log('ERROR: showBack' + err);
     }
   }
 }
