@@ -12,58 +12,42 @@ function play() {
   let sum_pl = 0;
   let turn = 0;
 
-  // Play a partie.
-  // Game is 100 points. The loser is lurched (skunked) for failing to reach 67
-  // points, and double-lurched for failing to reach 50.
-  let dealOrder = localGameParity.dealer.randomDealer();
-
   while (true) {
-    //    console.log('The player that deals is ' + dealOrder[0].getName())
-    localGameParity.judge.init(dealOrder[0], dealOrder[1]);
-    localGameParity.dealer.shuffle();
-    localGameParity.dealer.deal();
-    localGameParity.upperHandPlayer.sortHand();
-    localGameParity.lowerHandPlayer.sortHand();
-    localGameParity.judge.setTrump(localGameParity.judge.leader.getTrump());
-    localGameParity.judge.setParity(
-        localGameParity.judge.opponent.getParity());
-    for (let i = 0; i < 15; i++) {
-      //   console.log('Upper hand ' +
-      //   localGameParity.upperHandPlayer.getHand()); console.log('Lower hand
-      //   ' + localGameParity.lowerHandPlayer.getHand());
+    localGameParity.newGame();
 
-      let lCard = localGameParity.judge.leader.getCard();
-      localGameParity.judge.setLeadCard(lCard);
-      let oCard = localGameParity.judge.opponent.getCard();
-      localGameParity.judge.setOpponentCard(oCard);
-      //    console.log('Leader ' + localGameParity.judge.leader.getName() + '
-      //    plays
-      //    '
-      //    + lCard); console.log('Opponent ' +
-      //    localGameParity.judge.opponent.getName() + ' plays ' + oCard);
+    do {
+      localGameParity.dealer.shuffle();
+      localGameParity.dealer.deal();
+      localGameParity.upperHandPlayer.sortHand();
+      localGameParity.lowerHandPlayer.sortHand();
+      localGameParity.judge.setTrump(localGameParity.judge.leader.getTrump());
+      localGameParity.judge.setParity(
+          localGameParity.judge.opponent.getParity());
 
-      let winningPlayer = localGameParity.judge.getWinnerOfTrick();
-      //    console.log('Winner ' + winningPlayer.getName());
-      winningPlayer.addTrick([
-        localGameParity.judge.getLeadCard(),
-        localGameParity.judge.getOpponentCard()
-      ]);
-    }
+      // Play a single deal
+      while (!localGameParity.judge.isEndOfSingleDeal()) {
+        let lCard = localGameParity.judge.leader.getCard();
+        localGameParity.judge.setLeadCard(lCard);
+        let oCard = localGameParity.judge.opponent.getCard();
+        localGameParity.judge.setOpponentCard(oCard);
+        let winningPlayer = localGameParity.judge.getWinnerOfTrick();
+        winningPlayer.addTrick([
+          localGameParity.judge.getLeadCard(),
+          localGameParity.judge.getOpponentCard()
+        ]);
+      }
 
-    //    console.log(
-    //        localGameParity.upperHandPlayer.getName() + ': ' +
-    //        localGameParity.upperHandPlayer.getNrOfTricks());
-    //    console.log(
-    //        localGameParity.lowerHandPlayer.getName() + ': ' +
-    //        localGameParity.lowerHandPlayer.getNrOfTricks());
+      localGameParity.dealer.nextDealer();
 
-    if (localGameParity.upperHandPlayer.getNrOfTricks() >
-        localGameParity.lowerHandPlayer.getNrOfTricks()) {
-      sum_ai += 1;
-    } else {
-      sum_pl += 1;
-    }
+    } while (localGameParity.judge.setPoints() < 100)
+
     turn += 1;
+
+    if(localGameParity.upperHandPlayer.points > localGameParity.lowerHandPlayer.points) {
+        sum_ai++;
+    } else {
+        sum_pl++;
+    }
 
     if (turn % 10000 == 0) {
       console.log(
@@ -75,9 +59,6 @@ function play() {
       console.log('Ratio: ' + sum_pl / turn);
       return;
     }
-
-    // Switch dealer
-    localGameParity.dealer.nextDealer();
   }
 }
 

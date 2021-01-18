@@ -53,6 +53,7 @@ class Player {
     this.hand = [];
     this.judge = judge;
     this.tricks = [];
+    this.points = 0;
   }
 
   setName(n) {
@@ -97,6 +98,10 @@ class Player {
 
   clearTricks() {
     this.tricks = [];
+  }
+
+  clearHand() {
+    this.hand = [];
   }
 }
 
@@ -240,8 +245,6 @@ class Judge {
     this.eldest = eldest;
     this.leader = this.eldest;
     this.opponent = this.dealer;
-    this.leader.clearTricks();
-    this.opponent.clearTricks();
   }
 
   /**
@@ -331,10 +334,10 @@ class JudgeParity extends Judge {
       if (cardColor(e) == cardColor(this.leadCard)) {
         possible.push(e);
       }
-      if(cardColor(this.leadCard) == 'j' && cardColor(e) == 'j') {
+      if (cardColor(this.leadCard) == 'j' && cardColor(e) == 'j') {
         possible.push(e);
       }
-      if(cardColor(this.leadCard) == 'j' && cardColor(e) == this.trump) {
+      if (cardColor(this.leadCard) == 'j' && cardColor(e) == this.trump) {
         possible.push(e);
       }
     });
@@ -365,6 +368,37 @@ class JudgeParity extends Judge {
     }
 
     return this.leader;
+  }
+
+  isEndOfSingleDeal() {
+    return this.leader.getNrOfTricks() + this.opponent.getNrOfTricks() == 15
+  }
+
+  // setPoints() returns the points of the leading player.
+  setPoints() {
+    if (!this.isEndOfSingleDeal()) {
+      assert(false, 'Trying to set points but single deal is not over.');
+    }
+
+    if (this.parity == EVEN) {
+      if (this.leader.getNrOfTricks() % 2 == 0) {
+        this.leader.points += this.leader.getNrOfTricks();
+      } else {
+        this.opponent.points += this.opponent.getNrOfTricks();
+      }
+    } else {  // ODD parity
+      if (this.leader.getNrOfTricks() % 2 == 1) {
+        this.leader.points += this.leader.getNrOfTricks();
+      } else {
+        this.opponent.points += this.opponent.getNrOfTricks();
+      }
+    }
+
+    if(this.leader.points > this.opponent.points) {
+      return this.leader.points;
+    } else {
+      return this.opponent.points;
+    }
   }
 }
 
@@ -400,7 +434,11 @@ class Dealer {
         this.arrayOfPlayers.indexOf(this.current_dealer);
     let next_dealer_index =
         (index_current_dealer + 1) % this.arrayOfPlayers.length;
-    this.current_dealer = this.arrayOfPlayers[next_dealer_index]
+    this.current_dealer = this.arrayOfPlayers[next_dealer_index];
+
+    this.arrayOfPlayers.forEach(p => {
+      p.clearHand();
+    });
   }
 
   /**
@@ -496,6 +534,15 @@ class GameParity extends Game {
     }
     let a = [this.upperHandPlayer, this.lowerHandPlayer];
     this.dealer = new ParityDealer(a);
+  }
+  newGame() {
+    let dealOrder = this.dealer.randomDealer();
+    localGameParity.judge.init(dealOrder[0], dealOrder[1]);
+    this.upperHandPlayer.clearTricks();
+    this.lowerHandPlayer.clearTricks();
+    this.upperHandPlayer.points = 0;
+    this.lowerHandPlayer.points = 0;
+
   }
 }
 
