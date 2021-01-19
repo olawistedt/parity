@@ -15,7 +15,8 @@ alert /** @type {import("../typings")} */
 'use strict';
 
 // Use shift-F5 to reload program
-const SPEED = 0;
+const TEST = false;
+const SPEED = 400;
 const UPPER_HAND_IS_DEALER = -1;
 const LOWER_HAND_IS_DEALER = 1;
 const FRONT_FRAME = 0;
@@ -270,6 +271,9 @@ class PlayScene extends Phaser.Scene {
         this.displayTrumpAndParity();
         this.playCards();
       });
+      if (TEST) {
+        button_odd.emit('pointerdown');
+      }
     } else {
       let trump;
       this.chooseTrumpAndParityText.setText('NOMINATE THE TRUMP SUIT');
@@ -302,6 +306,9 @@ class PlayScene extends Phaser.Scene {
               this.displayTrumpAndParity();
               this.playCards();
             });
+            if (TEST) {
+              button_ok.emit('pointerdown');
+            }
           }
 
       let button_clubs = this.add.image(0, 0, 'button_clubs')
@@ -343,7 +350,9 @@ class PlayScene extends Phaser.Scene {
         pointerDownCommon();
         globalGameParity.judge.setTrump('s');
       });
-
+      if (TEST) {
+        button_clubs.emit('pointerdown');
+      }
       globalGameParity.judge.setTrump(trump);
       //      console.log('Lower hand chooses trump ' + trump);
     }
@@ -454,8 +463,8 @@ class PlayScene extends Phaser.Scene {
     this.showBack(globalGameParity.judge.getLeadCard());
     this.showBack(globalGameParity.judge.getOpponentCard());
     console.log(
-        'Cards played: ' + globalGameParity.judge.getLeadCard() + ' : ' +
-        globalGameParity.judge.getOpponentCard())
+        'Cards played: Lead card ' + globalGameParity.judge.getLeadCard() + ' : Opponent card ' +
+        globalGameParity.judge.getOpponentCard());
     let winner_y;
     if (winningPlayer == globalGameParity.upperHandPlayer) {
       winner_y = TRICKS_FROM_HORISONTAL_BORDER +
@@ -481,7 +490,12 @@ class PlayScene extends Phaser.Scene {
       });
       //    getTrick.play();
       getTrick.on('complete', () => {
-        this.playCards();
+        if (!globalGameParity.judge.isEndOfSingleDeal()) {
+          this.playCards();
+        } else {
+          let timer = this.time.delayedCall(
+              SPEED * 4, () => {this.scene.start('SCORE')});
+        }
       });
     });
   }

@@ -16,5 +16,6 @@ let game = new Phaser.Game({
 
   scene: [
     PlayScene,
+    ScoreScene,
   ],
 })

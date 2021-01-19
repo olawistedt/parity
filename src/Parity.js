@@ -340,6 +340,9 @@ class JudgeParity extends Judge {
       if (cardColor(this.leadCard) == 'j' && cardColor(e) == this.trump) {
         possible.push(e);
       }
+      if (cardColor(this.leadCard) == this.trump && cardColor(e) == 'j') {
+        possible.push(e);
+      }
     });
 
     // Any card can be played
@@ -353,17 +356,17 @@ class JudgeParity extends Judge {
   // Side effect: Sets the leader of next round.
   getWinnerOfTrick() {
     if (cardColor(this.opponentCard) == cardColor(this.leadCard) &&
+        cardColor(this.leadCard) != 'j' &&
         cardValue(this.opponentCard) > cardValue(this.leadCard)) {
       this.switchLeader();
     } else if (
         cardColor(this.opponentCard) == this.trump &&
+        cardColor(this.leadCard) != 'j' &&
         cardColor(this.leadCard) != this.trump) {
       this.switchLeader();
     } else if (
-        this.opponentCard == this.low_joker &&
+        cardColor(this.opponentCard) == 'j' &&
         this.leadCard != this.high_joker) {
-      this.switchLeader();
-    } else if (this.opponentCard == this.high_joker) {
       this.switchLeader();
     }
 
@@ -393,8 +396,11 @@ class JudgeParity extends Judge {
         this.opponent.points += this.opponent.getNrOfTricks();
       }
     }
+    return this.getMaxPoints();
+  }
 
-    if(this.leader.points > this.opponent.points) {
+  getMaxPoints() {
+    if (this.leader.points > this.opponent.points) {
       return this.leader.points;
     } else {
       return this.opponent.points;
@@ -436,6 +442,10 @@ class Dealer {
         (index_current_dealer + 1) % this.arrayOfPlayers.length;
     this.current_dealer = this.arrayOfPlayers[next_dealer_index];
 
+    this.clearHands();
+  }
+
+  clearHands() {
     this.arrayOfPlayers.forEach(p => {
       p.clearHand();
     });
@@ -537,12 +547,12 @@ class GameParity extends Game {
   }
   newGame() {
     let dealOrder = this.dealer.randomDealer();
-    localGameParity.judge.init(dealOrder[0], dealOrder[1]);
+    this.judge.init(dealOrder[0], dealOrder[1]);
     this.upperHandPlayer.clearTricks();
     this.lowerHandPlayer.clearTricks();
     this.upperHandPlayer.points = 0;
     this.lowerHandPlayer.points = 0;
-
+    this.dealer.clearHands();
   }
 }
 
