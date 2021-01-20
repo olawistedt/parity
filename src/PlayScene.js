@@ -463,8 +463,8 @@ class PlayScene extends Phaser.Scene {
     this.showBack(globalGameParity.judge.getLeadCard());
     this.showBack(globalGameParity.judge.getOpponentCard());
     console.log(
-        'Cards played: Lead card ' + globalGameParity.judge.getLeadCard() + ' : Opponent card ' +
-        globalGameParity.judge.getOpponentCard());
+        'Cards played: Lead card ' + globalGameParity.judge.getLeadCard() +
+        ' : Opponent card ' + globalGameParity.judge.getOpponentCard());
     let winner_y;
     if (winningPlayer == globalGameParity.upperHandPlayer) {
       winner_y = TRICKS_FROM_HORISONTAL_BORDER +
@@ -493,8 +493,10 @@ class PlayScene extends Phaser.Scene {
         if (!globalGameParity.judge.isEndOfSingleDeal()) {
           this.playCards();
         } else {
-          let timer = this.time.delayedCall(
-              SPEED * 4, () => {this.scene.start('SCORE')});
+          let timer = this.time.delayedCall(SPEED * 4, () => {
+            globalGameParity.judge.setTotalPoints();
+            this.scene.start('SCORE');
+          });
         }
       });
     });

@@ -24,8 +24,8 @@ class ScoreScene extends Phaser.Scene {
 
     let header = 'SCORE';
     if (globalGameParity.judge.getMaxPoints() >= 100) {
-      if (globalGameParity.upperhand.points >
-          globalGameParity.lowerhand.points) {
+      if (globalGameParity.upperhand.total_points >
+          globalGameParity.lowerhand.total_points) {
         header = 'AI WIN';
       } else {
         header = 'YOU WIN';
@@ -49,8 +49,8 @@ class ScoreScene extends Phaser.Scene {
 
     let aiPointsX = this.game.renderer.width / 2 + 150;
     let aiPointsY = this.game.renderer.height / 2 - 25;
-    let aiPoints = 'AI\n ' + globalGameParity.upperHandPlayer.getNrOfTricks() +
-        '\n\n ' + globalGameParity.upperHandPlayer.points;
+    let aiPoints = 'AI\n ' + globalGameParity.upperHandPlayer.deal_points +
+        '\n\n ' + globalGameParity.upperHandPlayer.total_points;
 
     let aiPointsText = this.add.text(aiPointsX, aiPointsY, aiPoints, {
       fontFamily: '"Arial"',
@@ -60,8 +60,9 @@ class ScoreScene extends Phaser.Scene {
 
     let playerPointsX = this.game.renderer.width / 2 + 300;
     let playerPointsY = this.game.renderer.height / 2 - 25;
-    let playerPoints = 'YOU\n  ' + globalGameParity.lowerHandPlayer.getNrOfTricks() +
-        '\n\n  ' + globalGameParity.lowerHandPlayer.points;
+    let playerPoints = 'YOU\n  ' +
+        globalGameParity.lowerHandPlayer.deal_points + '\n\n  ' +
+        globalGameParity.lowerHandPlayer.total_points;
 
     let playerPointsText =
         this.add.text(playerPointsX, playerPointsY, playerPoints, {

@@ -2,7 +2,7 @@
 const GameParity = require('./Parity');
 
 function play() {
-  localGameParity = new GameParity(2, globalJudgeParity);  // Two AI players
+  let localGameParity = new GameParity(2, globalJudgeParity);  // Two AI players
 
   localGameParity.upperHandPlayer.setName('Computer');
   localGameParity.lowerHandPlayer.setName('Ola');
@@ -16,6 +16,7 @@ function play() {
     localGameParity.newGame();
 
     do {
+      localGameParity.newSingleDeal();
       localGameParity.dealer.shuffle();
       localGameParity.dealer.deal();
       localGameParity.upperHandPlayer.sortHand();
@@ -39,11 +40,11 @@ function play() {
 
       localGameParity.dealer.nextDealer();
 
-    } while (localGameParity.judge.setPoints() < 100)
+    } while (localGameParity.judge.setTotalPoints() < 100)
 
     turn += 1;
 
-    if(localGameParity.upperHandPlayer.points > localGameParity.lowerHandPlayer.points) {
+    if(localGameParity.upperHandPlayer.total_points > localGameParity.lowerHandPlayer.total_points) {
         sum_ai++;
     } else {
         sum_pl++;

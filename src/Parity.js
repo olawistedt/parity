@@ -53,7 +53,8 @@ class Player {
     this.hand = [];
     this.judge = judge;
     this.tricks = [];
-    this.points = 0;
+    this.deal_points = 0;
+    this.total_points = 0;
   }
 
   setName(n) {
@@ -377,33 +378,41 @@ class JudgeParity extends Judge {
     return this.leader.getNrOfTricks() + this.opponent.getNrOfTricks() == 15
   }
 
-  // setPoints() returns the points of the leading player.
-  setPoints() {
+  // setDealPoints() returns the points of the leading player.
+  setDealPoints() {
     if (!this.isEndOfSingleDeal()) {
       assert(false, 'Trying to set points but single deal is not over.');
     }
 
     if (this.parity == EVEN) {
       if (this.leader.getNrOfTricks() % 2 == 0) {
-        this.leader.points += this.leader.getNrOfTricks();
+        this.leader.deal_points += this.leader.getNrOfTricks() + 10;
       } else {
-        this.opponent.points += this.opponent.getNrOfTricks();
+        this.opponent.deal_points += this.opponent.getNrOfTricks() + 10;
       }
     } else {  // ODD parity
       if (this.leader.getNrOfTricks() % 2 == 1) {
-        this.leader.points += this.leader.getNrOfTricks();
+        this.leader.deal_points += this.leader.getNrOfTricks() + 10;
       } else {
-        this.opponent.points += this.opponent.getNrOfTricks();
+        this.opponent.deal_points += this.opponent.getNrOfTricks() + 10;
       }
     }
     return this.getMaxPoints();
   }
 
+  // setPoints() returns the points of the leading player.
+  setTotalPoints() {
+    this.setDealPoints();
+    this.leader.total_points += this.leader.deal_points;
+    this.opponent.total_points += this.opponent.deal_points;
+    return this.getMaxPoints();
+  }
+
   getMaxPoints() {
-    if (this.leader.points > this.opponent.points) {
-      return this.leader.points;
+    if (this.leader.total_points > this.opponent.total_points) {
+      return this.leader.total_points;
     } else {
-      return this.opponent.points;
+      return this.opponent.total_points;
     }
   }
 }
@@ -550,9 +559,17 @@ class GameParity extends Game {
     this.judge.init(dealOrder[0], dealOrder[1]);
     this.upperHandPlayer.clearTricks();
     this.lowerHandPlayer.clearTricks();
-    this.upperHandPlayer.points = 0;
-    this.lowerHandPlayer.points = 0;
+    this.upperHandPlayer.deal_points = 0;
+    this.lowerHandPlayer.deal_points = 0;
+    this.upperHandPlayer.total_points = 0;
+    this.lowerHandPlayer.total_points = 0;
     this.dealer.clearHands();
+  }
+  newSingleDeal() {
+    this.upperHandPlayer.deal_points = 0;
+    this.lowerHandPlayer.deal_points = 0;
+    this.upperHandPlayer.clearTricks();
+    this.lowerHandPlayer.clearTricks();
   }
 }
 
