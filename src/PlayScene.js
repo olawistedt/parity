@@ -22,7 +22,7 @@ const LOWER_HAND_IS_DEALER = 1;
 const FRONT_FRAME = 0;
 const BACK_FRAME = 1;
 const HAND_DIST_FROM_HORISONTAL_BORDERS = 150;
-const HAND_DIST_FROM_VERTICAL_BORDERS = 200;
+const HAND_DIST_FROM_VERTICAL_BORDERS = 110;
 const HAND_DIST_BETWEEN_CARDS = 50;
 const TRICKS_FROM_HORISONTAL_BORDER = 350;
 
@@ -70,7 +70,7 @@ class PlayScene extends Phaser.Scene {
 
     this.showTrumpText =
         this.add
-            .text(this.game.renderer.width - 100, 25, 'Trump', {
+            .text(this.game.renderer.width - 100, 23, 'Trump', {
               fontFamily: '"Arial"',
               fontSize: '12px',
               depth: 100
@@ -81,7 +81,7 @@ class PlayScene extends Phaser.Scene {
 
     this.showParityText =
         this.add
-            .text(this.game.renderer.width - 100, 50, 'Parity', {
+            .text(this.game.renderer.width - 100, 37, 'Parity', {
               fontFamily: '"Arial"',
               fontSize: '12px',
               depth: 100
@@ -89,9 +89,34 @@ class PlayScene extends Phaser.Scene {
             })
             .setOrigin(0.5)
             .setVisible(true);
+
+    this.showUpperNrOfTricks =
+        this.add
+            .text(this.game.renderer.width - 300, 400, '0', {
+              fontFamily: '"Arial"',
+              fontSize: '12px',
+              depth: 100
+              // backgroundColor: '#0'
+            })
+            .setOrigin(0.5)
+            .setVisible(true);
+
+    this.showLowerNrOfTricks = this.add
+                                   .text(
+                                       this.game.renderer.width - 300,
+                                       this.game.renderer.height - 400, '0', {
+                                         fontFamily: '"Arial"',
+                                         fontSize: '12px',
+                                         depth: 100
+                                         // backgroundColor: '#0'
+                                       })
+                                   .setOrigin(0.5)
+                                   .setVisible(true);
+
     // Talk to the game engine begins
     let dealOrder = globalGameParity.dealer.randomDealer();
     globalGameParity.judge.init(dealOrder[0], dealOrder[1]);
+    globalGameParity.newSingleDeal();
     globalGameParity.dealer.shuffle();
     globalGameParity.upperHandPlayer.setName('Computer');
     globalGameParity.lowerHandPlayer.setName('Ola');
@@ -113,9 +138,9 @@ class PlayScene extends Phaser.Scene {
       this.sprites_hash[card_id] = this.add.sprite(
           -1000, -1000,
           'back');  // Create sprites, and display them outside the screen.
-
+      this.sprites_hash[card_id].setScale(.80);
       this.sprites_hash[card_id].setX(
-          70 + (CARD_PARITY_IDS.length - i) / 3);  // x value
+          80 + (CARD_PARITY_IDS.length - i) / 3);  // x value
       this.sprites_hash[card_id].setY(
           this.game.renderer.height / 2 + (CARD_PARITY_IDS.length - i) / 3 +
           deck_pos * 200);  // y value}
@@ -158,9 +183,8 @@ class PlayScene extends Phaser.Scene {
         y_base = this.game.renderer.height - HAND_DIST_FROM_HORISONTAL_BORDERS;
       }
 
-      let x_value = game.renderer.width / 2 -
-          2 * this.sprites_hash[card_id].width +
-          i / 2 * HAND_DIST_BETWEEN_CARDS;
+      let x_value =
+          HAND_DIST_FROM_VERTICAL_BORDERS + i / 2 * HAND_DIST_BETWEEN_CARDS;
 
       dealTween[i] = this.tweens.create({
         targets: this.sprites_hash[card_id],
@@ -184,7 +208,6 @@ class PlayScene extends Phaser.Scene {
 
           this.placeCardsNice();
           this.decideTrumpAndParity();
-          //          this.playCards();
         }
       });
     }
@@ -206,12 +229,7 @@ class PlayScene extends Phaser.Scene {
       upperTween = this.tweens.add({
         targets:
             this.sprites_hash[globalGameParity.upperHandPlayer.getHand()[i]],
-        x: game.renderer.width / 2 -
-            2 *
-                this.sprites_hash[globalGameParity.upperHandPlayer
-                                      .getHand()[i]]
-                    .width +
-            i * HAND_DIST_BETWEEN_CARDS,
+        x: HAND_DIST_FROM_VERTICAL_BORDERS + i * HAND_DIST_BETWEEN_CARDS,
         y: HAND_DIST_FROM_HORISONTAL_BORDERS,
         duration: SPEED / 2,
         ease: 'Linear',
@@ -221,12 +239,7 @@ class PlayScene extends Phaser.Scene {
       lowerTween = this.tweens.add({
         targets:
             this.sprites_hash[globalGameParity.lowerHandPlayer.getHand()[i]],
-        x: game.renderer.width / 2 -
-            2 *
-                this.sprites_hash[globalGameParity.lowerHandPlayer
-                                      .getHand()[i]]
-                    .width +
-            i * HAND_DIST_BETWEEN_CARDS,
+        x: HAND_DIST_FROM_VERTICAL_BORDERS + i * HAND_DIST_BETWEEN_CARDS,
         y: this.game.renderer.height - HAND_DIST_FROM_HORISONTAL_BORDERS,
         duration: SPEED / 2,
         ease: 'Linear',
@@ -313,7 +326,7 @@ class PlayScene extends Phaser.Scene {
 
       let button_clubs = this.add.image(0, 0, 'button_clubs')
                              .setVisible(true)
-                             .setY(this.game.renderer.height / 2 + 50)
+                             .setY(this.game.renderer.height / 2 + 70)
                              .setX(this.game.renderer.width / 2)
                              .setInteractive();
 
@@ -323,7 +336,7 @@ class PlayScene extends Phaser.Scene {
       });
       let button_diamonds = this.add.image(0, 0, 'button_diamonds')
                                 .setVisible(true)
-                                .setY(this.game.renderer.height / 2 + 110)
+                                .setY(this.game.renderer.height / 2 + 130)
                                 .setX(this.game.renderer.width / 2)
                                 .setInteractive();
 
@@ -333,7 +346,7 @@ class PlayScene extends Phaser.Scene {
       });
       let button_hearts = this.add.image(0, 0, 'button_hearts')
                               .setVisible(true)
-                              .setY(this.game.renderer.height / 2 + 170)
+                              .setY(this.game.renderer.height / 2 + 190)
                               .setX(this.game.renderer.width / 2)
                               .setInteractive();
 
@@ -343,7 +356,7 @@ class PlayScene extends Phaser.Scene {
       });
       let button_spades = this.add.image(0, 0, 'button_spades')
                               .setVisible(true)
-                              .setY(this.game.renderer.height / 2 + 230)
+                              .setY(this.game.renderer.height / 2 + 250)
                               .setX(this.game.renderer.width / 2)
                               .setInteractive();
       button_spades.on('pointerdown', () => {
@@ -460,6 +473,10 @@ class PlayScene extends Phaser.Scene {
       globalGameParity.judge.getLeadCard(),
       globalGameParity.judge.getOpponentCard()
     ]);
+    this.showUpperNrOfTricks.setText(
+        globalGameParity.upperHandPlayer.getNrOfTricks());
+    this.showLowerNrOfTricks.setText(
+        globalGameParity.lowerHandPlayer.getNrOfTricks());
     this.showBack(globalGameParity.judge.getLeadCard());
     this.showBack(globalGameParity.judge.getOpponentCard());
     console.log(
@@ -488,7 +505,6 @@ class PlayScene extends Phaser.Scene {
         depth: this.max_depth,
         angle: 90
       });
-      //    getTrick.play();
       getTrick.on('complete', () => {
         if (!globalGameParity.judge.isEndOfSingleDeal()) {
           this.playCards();

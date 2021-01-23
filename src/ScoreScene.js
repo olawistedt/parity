@@ -47,9 +47,9 @@ class ScoreScene extends Phaser.Scene {
         });
     categoryText.setOrigin(0.5);
 
-    let aiPointsX = this.game.renderer.width / 2 + 150;
+    let aiPointsX = this.game.renderer.width / 2 + 155;
     let aiPointsY = this.game.renderer.height / 2 - 25;
-    let aiPoints = 'AI\n ' + globalGameParity.upperHandPlayer.deal_points +
+    let aiPoints = ' AI\n ' + globalGameParity.upperHandPlayer.deal_points +
         '\n\n ' + globalGameParity.upperHandPlayer.total_points;
 
     let aiPointsText = this.add.text(aiPointsX, aiPointsY, aiPoints, {
@@ -60,8 +60,8 @@ class ScoreScene extends Phaser.Scene {
 
     let playerPointsX = this.game.renderer.width / 2 + 300;
     let playerPointsY = this.game.renderer.height / 2 - 25;
-    let playerPoints = 'YOU\n  ' +
-        globalGameParity.lowerHandPlayer.deal_points + '\n\n  ' +
+    let playerPoints = 'YOU\n   ' +
+        globalGameParity.lowerHandPlayer.deal_points + '\n\n   ' +
         globalGameParity.lowerHandPlayer.total_points;
 
     let playerPointsText =
