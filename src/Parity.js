@@ -143,8 +143,37 @@ class Ai extends Player {
   }
 
   getTrump() {
+    switch (this.level) {
+      case 1:
+        return this.getTrump1();
+      case 2:
+        return this.getTrump2();
+      case 3:
+        return this.getTrump3();
+    }
+  }
+
+  getTrump1() {
     let a = ['c', 'd', 'h', 's'];
     return a[Math.floor(Math.random() * a.length)];
+  }
+
+  getTrump2() {
+    // Count hearts
+    let color_count = {'c': 0, 'd': 0, 'h': 0, 's': 0};
+    this.hand.forEach(e => {
+      color_count[cardColor(e)] += cardValue(e);
+    });
+    // Find out color with highest sum
+    let max = 0;
+    let max_color = '';
+    for(const property in color_count) {
+      if(color_count[property] > max) {
+        max = color_count[property];
+        max_color = property
+      }
+    }
+    return max_color;
   }
 
   getParity() {
