@@ -58,9 +58,9 @@ class ScoreScene extends Phaser.Scene {
     });
     aiPointsText.setOrigin(0.5);
 
-    let playerPointsX = this.game.renderer.width / 2 + 300;
+    let playerPointsX = this.game.renderer.width / 2 + 310;
     let playerPointsY = this.game.renderer.height / 2 - 25;
-    let playerPoints = 'YOU\n   ' +
+    let playerPoints = '  YOU\n   ' +
         globalGameParity.lowerHandPlayer.deal_points + '\n\n   ' +
         globalGameParity.lowerHandPlayer.total_points;
 

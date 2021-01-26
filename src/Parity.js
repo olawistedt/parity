@@ -125,6 +125,12 @@ class Ai extends Player {
   constructor(level, judge) {
     super(judge);
     this.level = level;
+
+    if (this.level == 3) {
+      // Setup simulation to play with two ramdom (level 1) AI's
+      this.simulateJudgeParity = new JudgeParity();
+      this.simulateGameParity = new GameParity(1, 1, this.simulateJudgeParity);
+    }
   }
 
   getCard() {
@@ -149,7 +155,7 @@ class Ai extends Player {
       case 2:
         return this.getTrump2();
       case 3:
-        return this.getTrump3();
+        return this.getTrump2();
     }
   }
 
@@ -167,8 +173,8 @@ class Ai extends Player {
     // Find out color with highest sum
     let max = 0;
     let max_color = '';
-    for(const property in color_count) {
-      if(color_count[property] > max) {
+    for (const property in color_count) {
+      if (color_count[property] > max) {
         max = color_count[property];
         max_color = property
       }
@@ -221,6 +227,120 @@ class Ai extends Player {
     }
     this.removeCard(card_id);
     return card_id;
+  }
+
+  // Simulates a bunch of games with current hands. Chooses to play the card
+  // that takes the most tricks and has correct parity. If correct parity was
+  // not discovered choose the card that leads to most tricks (to minimize
+  // opponent points).
+  // Let this player be the simulator upper hand player
+  getCard3() {
+    let possible = this.judge.getPossibleCardsToPlay(this);
+    this.simulateGameParity.judge.setTrump(this.judge.trump);
+    this.simulateGameParity.judge.setParity(this.judge.parity);
+    this.simulateGameParity.upperHandPlayer.setName('Sim Upper');
+    this.simulateGameParity.lowerHandPlayer.setName('Sim Lower');
+
+    let play_card;
+    let max_even_won_tricks = 0;
+    let max_odd_won_tricks = 0;
+    let max_even_play_card = possible[0];
+    let max_odd_play_card = possible[0];
+
+    possible.forEach(current_card => {
+//      console.log('Simulate the card ' + current_card);
+      // Setup the simulator game to reflect the main game
+      if (this == this.judge.leader) {  // this is the player with AI level 3
+//        console.log('AI level 3 is the leader');
+        this.simulateGameParity.judge.leader =
+            this.simulateGameParity.lowerHandPlayer;
+        this.simulateGameParity.judge.opponent =
+            this.simulateGameParity.upperHandPlayer;
+      } else {
+//        console.log('AI level 3 is the opponent');
+        this.simulateGameParity.judge.leader =
+            this.simulateGameParity.upperHandPlayer;
+        this.simulateGameParity.judge.opponent =
+            this.simulateGameParity.lowerHandPlayer;
+      }
+      this.simulateGameParity.judge.leader.hand =
+          this.judge.leader.hand.slice();
+      this.simulateGameParity.judge.opponent.hand =
+          this.judge.opponent.hand.slice();
+
+      this.simulateGameParity.judge.leader.tricks =
+          this.judge.leader.tricks.slice();
+      this.simulateGameParity.judge.opponent.tricks =
+          this.judge.opponent.tricks.slice();
+
+      if (this == this.judge.leader) {
+        // No card has been played. This AI will lead into the first trick. Set
+        // current card to the lead card and ask the AI simulator to play the
+        // opponent card.
+        this.simulateGameParity.judge.setLeadCard(current_card);
+        this.simulateGameParity.lowerHandPlayer.removeCard(current_card);
+        let oCard = this.simulateGameParity.judge.opponent.getCard();
+        this.simulateGameParity.judge.setOpponentCard(oCard);
+      } else {
+        // Set simulator lead card to be the current lead card. The card has
+        // already been played in this moment.
+        let lCard = this.judge.getLeadCard();
+        this.simulateGameParity.judge.setLeadCard(lCard);
+        this.simulateGameParity.judge.setOpponentCard(current_card);
+        this.simulateGameParity.lowerHandPlayer.removeCard(current_card);
+      }
+
+      let winningPlayer = this.simulateGameParity.judge.getWinnerOfTrick();
+//      console.log('winner of first trick is ' + winningPlayer.getName());
+      winningPlayer.addTrick([
+        this.simulateGameParity.judge.getLeadCard(),
+        this.simulateGameParity.judge.getOpponentCard()
+      ]);
+
+      // Test play the rest of the hand with
+      while (!this.simulateGameParity.judge.isEndOfSingleDeal()) {
+        //        console.log(
+        //            'Leader in sub game is ' +
+        //            this.simulateGameParity.judge.leader.getName());
+        let lCard = this.simulateGameParity.judge.leader.getCard();
+        if (lCard == undefined) {
+          console.log('Error');
+        }
+        this.simulateGameParity.judge.setLeadCard(lCard);
+        let oCard = this.simulateGameParity.judge.opponent.getCard();
+        this.simulateGameParity.judge.setOpponentCard(oCard);
+        //        console.log('Cards played ' + lCard + ' - ' + oCard);
+        let winningPlayer = this.simulateGameParity.judge.getWinnerOfTrick();
+        //        console.log('winner of trick is ' + winningPlayer.getName());
+        winningPlayer.addTrick([
+          this.simulateGameParity.judge.getLeadCard(),
+          this.simulateGameParity.judge.getOpponentCard()
+        ]);
+      }
+      let won_tricks = this.simulateGameParity.lowerHandPlayer.getNrOfTricks();
+      if (won_tricks % 2 == EVEN) {
+        if (won_tricks >= max_even_won_tricks) {
+          max_even_won_tricks = won_tricks;
+          max_even_play_card = current_card;
+        }
+
+      } else {
+        if (won_tricks >= max_odd_won_tricks) {
+          max_odd_won_tricks = won_tricks;
+          max_odd_play_card = current_card;
+        }
+      }
+    });
+
+    if (this.judge.parity == EVEN) {
+      play_card = max_even_play_card;
+    } else {
+      play_card = max_odd_play_card;
+    }
+
+
+    this.removeCard(play_card);
+    return play_card;
   }
 }
 
@@ -492,7 +612,8 @@ class Dealer {
   /**
    *
    * @param {number} similar : How many cards to deal at a time.
-   * @param {number} total : The total number of cards to deal to each player.
+   * @param {number} total : The total number of cards to deal to each
+   *     player.
    */
   deal(similar, total) {
     assert(
@@ -570,15 +691,17 @@ class Game {
  *
  */
 class GameParity extends Game {
-  constructor(nr_of_ai_players, judge) {
+  constructor(upper_hand_ai_level, lower_hand_ai_level, judge) {
     super(judge);
-    this.nr_of_ai_players = nr_of_ai_players;
-    if (this.nr_of_ai_players == 1) {
-      this.upperHandPlayer = new Ai(1, this.judge);
+    if (upper_hand_ai_level == 0) {
+      this.upperHandPlayer = new Human(this.judge);
+    } else {
+      this.upperHandPlayer = new Ai(upper_hand_ai_level, this.judge);
+    }
+    if (lower_hand_ai_level == 0) {
       this.lowerHandPlayer = new Human(this.judge);
     } else {
-      this.upperHandPlayer = new Ai(1, this.judge);
-      this.lowerHandPlayer = new Ai(1, this.judge);
+      this.lowerHandPlayer = new Ai(lower_hand_ai_level, this.judge);
     }
     let a = [this.upperHandPlayer, this.lowerHandPlayer];
     this.dealer = new ParityDealer(a);
@@ -605,6 +728,6 @@ class GameParity extends Game {
 // These global variables is used by the GUI and command line versions of
 // Parity.
 globalJudgeParity = new JudgeParity();
-globalGameParity = new GameParity(1, globalJudgeParity);
+globalGameParity = new GameParity(1, 0, globalJudgeParity);
 
 module.exports = GameParity;

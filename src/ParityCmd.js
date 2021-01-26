@@ -2,11 +2,10 @@
 const GameParity = require('./Parity');
 
 function play() {
-  let localGameParity = new GameParity(2, globalJudgeParity);  // Two AI players
+  let localGameParity = new GameParity(1, 3, globalJudgeParity);  // Two AI players
 
   localGameParity.upperHandPlayer.setName('Computer');
   localGameParity.lowerHandPlayer.setName('Ola');
-  localGameParity.lowerHandPlayer.setAiLevel(2);
 
   let sum_ai = 0;
   let sum_pl = 0;
