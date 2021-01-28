@@ -16,7 +16,7 @@ alert /** @type {import("../typings")} */
 
 // Use shift-F5 to reload program
 const TEST = false;
-const SPEED = 400;
+const SPEED = 400;  // Good for playing live is 400
 const UPPER_HAND_IS_DEALER = -1;
 const LOWER_HAND_IS_DEALER = 1;
 const FRONT_FRAME = 0;
@@ -40,6 +40,8 @@ class PlayScene extends Phaser.Scene {
 
   preload() {
     preloadCards(this);
+
+    // Images
     this.load.image('cloth', 'assets/tilesets/bgslagrn.jpg');
     this.load.image('button_ok', 'assets/buttons/button_ok.png');
     this.load.image('button_odd', 'assets/buttons/button_odd.png');
@@ -48,12 +50,17 @@ class PlayScene extends Phaser.Scene {
     this.load.image('button_diamonds', 'assets/buttons/button_diamonds.png');
     this.load.image('button_hearts', 'assets/buttons/button_hearts.png');
     this.load.image('button_spades', 'assets/buttons/button_spades.png');
+
+    // Audios
+    this.load.audio('wrong_card', ['assets/sound/wrong_card.mp3']);
   }
 
   create() {
     this.add.tileSprite(
         0, 0, this.game.renderer.width * 2, this.game.renderer.height * 2,
         'cloth');  // Add the background
+
+    this.snd_wrong_card = this.sound.add('wrong_card');
 
     this.chooseTrumpAndParityText =
         this.add
@@ -92,9 +99,9 @@ class PlayScene extends Phaser.Scene {
 
     this.showUpperNrOfTricks =
         this.add
-            .text(this.game.renderer.width - 300, 400, '0', {
+            .text(this.game.renderer.width - 250, 400, '0', {
               fontFamily: '"Arial"',
-              fontSize: '12px',
+              fontSize: '24px',
               depth: 100
               // backgroundColor: '#0'
             })
@@ -103,10 +110,10 @@ class PlayScene extends Phaser.Scene {
 
     this.showLowerNrOfTricks = this.add
                                    .text(
-                                       this.game.renderer.width - 300,
+                                       this.game.renderer.width - 250,
                                        this.game.renderer.height - 400, '0', {
                                          fontFamily: '"Arial"',
-                                         fontSize: '12px',
+                                         fontSize: '24px',
                                          depth: 100
                                          // backgroundColor: '#0'
                                        })
@@ -288,7 +295,6 @@ class PlayScene extends Phaser.Scene {
         button_odd.emit('pointerdown');
       }
     } else {
-      let trump;
       this.chooseTrumpAndParityText.setText('NOMINATE THE TRUMP SUIT');
       this.chooseTrumpAndParityText.setVisible(true);
 
@@ -366,7 +372,6 @@ class PlayScene extends Phaser.Scene {
       if (TEST) {
         button_clubs.emit('pointerdown');
       }
-      globalGameParity.judge.setTrump(trump);
       //      console.log('Lower hand chooses trump ' + trump);
     }
   }
@@ -410,6 +415,10 @@ class PlayScene extends Phaser.Scene {
         let s = this.sprites_hash[e];
         s.setInteractive();
       });
+      if(TEST) {
+        let card_id = globalGameParity.lowerHandPlayer.getCard();
+        this.sprites_hash[card_id].emit('pointerdown');
+      }
     }
   }
 
@@ -464,6 +473,8 @@ class PlayScene extends Phaser.Scene {
           this.placeCardsNice();
         }
       });
+    } else {  // The card pressed cannot be played.
+      this.snd_wrong_card.play();
     }
   }
 

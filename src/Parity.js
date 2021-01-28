@@ -248,16 +248,16 @@ class Ai extends Player {
     let max_odd_play_card = possible[0];
 
     possible.forEach(current_card => {
-//      console.log('Simulate the card ' + current_card);
+      //      console.log('Simulate the card ' + current_card);
       // Setup the simulator game to reflect the main game
       if (this == this.judge.leader) {  // this is the player with AI level 3
-//        console.log('AI level 3 is the leader');
+        //        console.log('AI level 3 is the leader');
         this.simulateGameParity.judge.leader =
             this.simulateGameParity.lowerHandPlayer;
         this.simulateGameParity.judge.opponent =
             this.simulateGameParity.upperHandPlayer;
       } else {
-//        console.log('AI level 3 is the opponent');
+        //        console.log('AI level 3 is the opponent');
         this.simulateGameParity.judge.leader =
             this.simulateGameParity.upperHandPlayer;
         this.simulateGameParity.judge.opponent =
@@ -728,6 +728,12 @@ class GameParity extends Game {
 // These global variables is used by the GUI and command line versions of
 // Parity.
 globalJudgeParity = new JudgeParity();
-globalGameParity = new GameParity(1, 0, globalJudgeParity);
+let level = 0; // Human player
+let level_ai = 3;
+if (TEST) {
+  level = 1; // AI level 1 player
+  level_ai = 1;
+}
+globalGameParity = new GameParity(level_ai, level, globalJudgeParity);
 
 module.exports = GameParity;

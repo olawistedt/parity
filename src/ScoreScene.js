@@ -24,8 +24,8 @@ class ScoreScene extends Phaser.Scene {
 
     let header = 'SCORE';
     if (globalGameParity.judge.getMaxPoints() >= 100) {
-      if (globalGameParity.upperhand.total_points >
-          globalGameParity.lowerhand.total_points) {
+      if (globalGameParity.upperHandPlayer.total_points >
+          globalGameParity.lowerHandPlayer.total_points) {
         header = 'AI WIN';
       } else {
         header = 'YOU WIN';
