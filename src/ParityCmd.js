@@ -1,4 +1,5 @@
 
+TEST = false;
 const GameParity = require('./Parity');
 
 function play() {

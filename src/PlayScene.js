@@ -206,7 +206,7 @@ class PlayScene extends Phaser.Scene {
         x: x_value,
         duration: SPEED,
         ease: 'Linear',
-        depth: CARD_PARITY_IDS.length - i
+        depth: CARD_PARITY_IDS.length + CARD_PARITY_IDS.length - i
       })
 
       dealTween[i].on('complete', () => {
