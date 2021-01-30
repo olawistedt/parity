@@ -624,7 +624,7 @@ class Dealer {
 
     for (let i = 0; i < total * this.arrayOfPlayers.length; i++) {
       this.arrayOfPlayers[(i + index_current_dealer + 1) % this.arrayOfPlayers.length]
-          .addCard(this.deck.shift());
+          .addCard(this.deck.pop());
     }
   }
 

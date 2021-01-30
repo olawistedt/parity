@@ -151,6 +151,7 @@ class PlayScene extends Phaser.Scene {
       this.sprites_hash[card_id].setY(
           this.game.renderer.height / 2 + (CARD_PARITY_IDS.length - i) / 3 +
           deck_pos * 200);  // y value}
+      this.sprites_hash[card_id].setDepth(i);
 
       this.anims.create({
         key: 'anim_key_' + card_id,
@@ -169,17 +170,23 @@ class PlayScene extends Phaser.Scene {
   deal() {
     this.max_depth = 4;
     let dealTween = [];
+    let upper_x = 0;
+    let lower_x = 0;
+    let x_value = 0;
     for (let i = CARD_PARITY_IDS.length - 1; i > -1; i--) {
       let card_id = globalGameParity.dealer.deck[i];
 
       let y_base = 0;
-      if ((i % 2 != 0 &&
+      if ((i % 2 == 0 &&
            globalGameParity.upperHandPlayer ==
                globalGameParity.dealer.current_dealer) ||
-          (i % 2 == 0 &&
+          (i % 2 != 0 &&
            globalGameParity.lowerHandPlayer ==
                globalGameParity.dealer.current_dealer)) {
         y_base = HAND_DIST_FROM_HORISONTAL_BORDERS;
+        x_value = HAND_DIST_FROM_VERTICAL_BORDERS +
+            upper_x * HAND_DIST_BETWEEN_CARDS;
+        upper_x++;
       } else {
         this.lower_hand_ids.push(card_id);
         this.sprites_hash[card_id].setInteractive();
@@ -188,10 +195,10 @@ class PlayScene extends Phaser.Scene {
             () => {this.cardIsPressed(this.sprites_hash[card_id])}, this);
 
         y_base = this.game.renderer.height - HAND_DIST_FROM_HORISONTAL_BORDERS;
+        x_value = HAND_DIST_FROM_VERTICAL_BORDERS +
+            lower_x * HAND_DIST_BETWEEN_CARDS;
+        lower_x++;
       }
-
-      let x_value =
-          HAND_DIST_FROM_VERTICAL_BORDERS + i / 2 * HAND_DIST_BETWEEN_CARDS;
 
       dealTween[i] = this.tweens.create({
         targets: this.sprites_hash[card_id],
@@ -199,12 +206,12 @@ class PlayScene extends Phaser.Scene {
         x: x_value,
         duration: SPEED,
         ease: 'Linear',
-        depth: i
+        depth: CARD_PARITY_IDS.length - i
       })
 
       dealTween[i].on('complete', () => {
-        if (i != CARD_PARITY_IDS.length - 1) {  // The cards to be dealth
-          dealTween[i + 1].play();
+        if (i != 0) {  // The cards to be dealth
+          dealTween[i - 1].play();
         } else {
           // Turn the lower hand cards to show front
           this.lower_hand_ids.forEach(e => {
@@ -212,13 +219,13 @@ class PlayScene extends Phaser.Scene {
           });
 
           globalGameParity.dealer.deal();
-
+          console.log(globalGameParity.lowerHandPlayer.getHand());
           this.placeCardsNice();
           this.decideTrumpAndParity();
         }
       });
     }
-    dealTween[0].play();
+    dealTween[CARD_PARITY_IDS.length - 1].play();
   }
 
   placeCardsNice() {
@@ -415,7 +422,7 @@ class PlayScene extends Phaser.Scene {
         let s = this.sprites_hash[e];
         s.setInteractive();
       });
-      if(TEST) {
+      if (TEST) {
         let card_id = globalGameParity.lowerHandPlayer.getCard();
         this.sprites_hash[card_id].emit('pointerdown');
       }
