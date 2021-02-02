@@ -236,18 +236,39 @@ class Ai extends Player {
   // Let this player be the simulator upper hand player
   getCard3() {
     let possible = this.judge.getPossibleCardsToPlay(this);
+
+    let a = [];  // Array of results for each card
+    let simulator_rounds = 100;
+
+    possible.forEach(current_card => {
+      a.push(this.simulatePlayCard(current_card, simulator_rounds));
+    });
+
+    // Find the card with highest score
+    let max = ['', 0];
+    for (let i = 0; i < a.length; i++) {
+      if (a[i][1] >= max[1]) {
+        max[0] = a[i][0];
+        max[1] = a[i][1];
+      }
+    }
+
+    this.removeCard(max[0]);
+    return max[0];
+  }
+
+simulatePlayCard(current_card, times) {
+    let points_correct_parity = 50;
+    let points_per_trick = 3;
+
+    let trick_table = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+
     this.simulateGameParity.judge.setTrump(this.judge.trump);
     this.simulateGameParity.judge.setParity(this.judge.parity);
     this.simulateGameParity.upperHandPlayer.setName('Sim Upper');
     this.simulateGameParity.lowerHandPlayer.setName('Sim Lower');
 
-    let play_card;
-    let max_even_won_tricks = 0;
-    let max_odd_won_tricks = 0;
-    let max_even_play_card = possible[0];
-    let max_odd_play_card = possible[0];
-
-    possible.forEach(current_card => {
+    for (let i = 0; i < times; i++) {
       //      console.log('Simulate the card ' + current_card);
       // Setup the simulator game to reflect the main game
       if (this == this.judge.leader) {  // this is the player with AI level 3
@@ -291,7 +312,8 @@ class Ai extends Player {
       }
 
       let winningPlayer = this.simulateGameParity.judge.getWinnerOfTrick();
-//      console.log('winner of first trick is ' + winningPlayer.getName());
+      //      console.log('winner of first trick is ' +
+      //      winningPlayer.getName());
       winningPlayer.addTrick([
         this.simulateGameParity.judge.getLeadCard(),
         this.simulateGameParity.judge.getOpponentCard()
@@ -317,32 +339,38 @@ class Ai extends Player {
           this.simulateGameParity.judge.getOpponentCard()
         ]);
       }
+
       let won_tricks = this.simulateGameParity.lowerHandPlayer.getNrOfTricks();
-      if (won_tricks % 2 == EVEN) {
-        if (won_tricks >= max_even_won_tricks) {
-          max_even_won_tricks = won_tricks;
-          max_even_play_card = current_card;
-        }
-
-      } else {
-        if (won_tricks >= max_odd_won_tricks) {
-          max_odd_won_tricks = won_tricks;
-          max_odd_play_card = current_card;
-        }
-      }
-    });
-
-    if (this.judge.parity == EVEN) {
-      play_card = max_even_play_card;
-    } else {
-      play_card = max_odd_play_card;
+      trick_table[won_tricks]++;
     }
 
+    //
+    // Draw conclusions about the above simulations
+    //
+    let max_points = 0;
+    for (let i = 0; i < trick_table.length; i++) {
+      let points = 0;
 
-    this.removeCard(play_card);
-    return play_card;
+      // Set points for correct parity
+      if (i % 2 == 0 && this.simulateGameParity.judge.parity == EVEN) {
+        points = points_correct_parity;
+      } else if (i % 2 != 0 && this.simulateGameParity.judge.parity == ODD) {
+        points = points_correct_parity;
+      }
+
+      // Set points per trick
+      points += points_per_trick * i;
+
+      // Multiplicate with the % of chance this occurs
+      points *= trick_table[i] / times;
+
+      if (points >= max_points) {
+        max_points = points;
+      }
+    }
+    return [current_card, max_points];
   }
-}
+}  // End of class Ai
 
 /**
  * @classdesc
@@ -728,10 +756,10 @@ class GameParity extends Game {
 // These global variables is used by the GUI and command line versions of
 // Parity.
 globalJudgeParity = new JudgeParity();
-let level = 0; // Human player
+let level = 0;  // Human player
 let level_ai = 3;
 if (TEST) {
-  level = 1; // AI level 1 player
+  level = 1;  // AI level 1 player
   level_ai = 1;
 }
 globalGameParity = new GameParity(level_ai, level, globalJudgeParity);

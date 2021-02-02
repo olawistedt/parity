@@ -15,7 +15,7 @@ function play() {
   while (true) {
     localGameParity.newGame();
 
-    do {
+// Uncomment to go to 100 points    do {
       localGameParity.newSingleDeal();
       localGameParity.dealer.shuffle();
       localGameParity.dealer.deal();
@@ -40,7 +40,7 @@ function play() {
 
       localGameParity.dealer.nextDealer();
 
-    } while (localGameParity.judge.setTotalPoints() < 100)
+// Uncomment to go to 100 points    } while (localGameParity.judge.setTotalPoints() < 100)
 
     turn += 1;
 
@@ -50,13 +50,13 @@ function play() {
         sum_pl++;
     }
 
-    if (turn % 10000 == 0) {
+    if (turn % 1000 == 0) {
       console.log(
           localGameParity.upperHandPlayer.getName() + ' ' + sum_ai + ' : ' +
           localGameParity.lowerHandPlayer.getName() + ' ' + sum_pl)
     }
 
-    if (turn % 100000 == 0) {
+    if (turn % 10000 == 0) {
       console.log('Ratio: ' + sum_pl / turn);
       return;
     }
