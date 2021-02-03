@@ -133,17 +133,6 @@ class Ai extends Player {
     }
   }
 
-  getCard() {
-    switch (this.level) {
-      case 1:
-        return this.getCard1();
-      case 2:
-        return this.getCard2();
-      case 3:
-        return this.getCard3();
-    }
-  }
-
   setAiLevel(nr) {
     this.level = nr;
   }
@@ -156,6 +145,34 @@ class Ai extends Player {
         return this.getTrump2();
       case 3:
         return this.getTrump2();
+      case 4:
+        return this.getTrump2();
+    }
+  }
+
+  getParity() {
+    switch (this.level) {
+      case 1:
+        return this.getParity1();
+      case 2:
+        return this.getParity1();
+      case 3:
+        return this.getParity1();
+      case 4:
+        return this.getParity1();
+    }
+  }
+
+  getCard() {
+    switch (this.level) {
+      case 1:
+        return this.getCard1();
+      case 2:
+        return this.getCard2();
+      case 3:
+        return this.getCard3();
+      case 4:
+        return this.getCard4();
     }
   }
 
@@ -182,7 +199,7 @@ class Ai extends Player {
     return max_color;
   }
 
-  getParity() {
+  getParity1() {
     let a = [EVEN, ODD];
     return a[Math.floor(Math.random() * a.length)];
   }
@@ -238,10 +255,15 @@ class Ai extends Player {
     let possible = this.judge.getPossibleCardsToPlay(this);
 
     let a = [];  // Array of results for each card
-    let simulator_rounds = 100;
+
+    let simulator_rounds = 10;
+    let points_correct_parity = 55;
+    let points_per_trick = 3;
 
     possible.forEach(current_card => {
-      a.push(this.simulatePlayCard(current_card, simulator_rounds));
+      a.push(this.simulatePlayCard(
+          current_card, simulator_rounds, points_correct_parity,
+          points_per_trick));
     });
 
     // Find the card with highest score
@@ -257,10 +279,8 @@ class Ai extends Player {
     return max[0];
   }
 
-simulatePlayCard(current_card, times) {
-    let points_correct_parity = 50;
-    let points_per_trick = 3;
-
+  simulatePlayCard(
+      current_card, times, points_correct_parity, points_per_trick) {
     let trick_table = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 
     this.simulateGameParity.judge.setTrump(this.judge.trump);
@@ -269,16 +289,13 @@ simulatePlayCard(current_card, times) {
     this.simulateGameParity.lowerHandPlayer.setName('Sim Lower');
 
     for (let i = 0; i < times; i++) {
-      //      console.log('Simulate the card ' + current_card);
       // Setup the simulator game to reflect the main game
       if (this == this.judge.leader) {  // this is the player with AI level 3
-        //        console.log('AI level 3 is the leader');
         this.simulateGameParity.judge.leader =
             this.simulateGameParity.lowerHandPlayer;
         this.simulateGameParity.judge.opponent =
             this.simulateGameParity.upperHandPlayer;
       } else {
-        //        console.log('AI level 3 is the opponent');
         this.simulateGameParity.judge.leader =
             this.simulateGameParity.upperHandPlayer;
         this.simulateGameParity.judge.opponent =
