@@ -157,9 +157,9 @@ class Ai extends Player {
       case 2:
         return this.getParity1();
       case 3:
-        return this.getParity1();
+        return this.getParity3();
       case 4:
-        return this.getParity1();
+        return this.getParity3();
     }
   }
 
@@ -202,6 +202,65 @@ class Ai extends Player {
   getParity1() {
     let a = [EVEN, ODD];
     return a[Math.floor(Math.random() * a.length)];
+  }
+
+  getParity3() {
+    // Upperhand is the opponent and should choose parity and thereafter the
+    // leader plays the first card.
+    let localJudgeParity = new JudgeParity();
+    let localGameParity = new GameParity(1, 1, localJudgeParity);
+    localGameParity.judge.setTrump(globalGameParity.judge.leader.getTrump());
+    localGameParity.upperHandPlayer.setName('Opponent');
+    localGameParity.lowerHandPlayer.setName('Leader');
+
+    let testingParity = ODD;
+    let nr_of_odd_games_won = 0;
+    let nr_of_even_games_won = 0;
+
+    for (let i = 0; i < 1000; i++) {
+      if (testingParity == ODD) {
+        testingParity = EVEN;
+      } else {
+        testingParity = ODD;
+      }
+      localJudgeParity.init(
+          localGameParity.upperHandPlayer, localGameParity.lowerHandPlayer);
+      localGameParity.newSingleDeal();  // Clears tricks
+      localGameParity.judge.leader.hand = this.judge.leader.hand.slice();
+      localGameParity.judge.opponent.hand = this.judge.opponent.hand.slice();
+      localGameParity.judge.setParity(testingParity);
+
+      // Play a single deal
+      while (!localGameParity.judge.isEndOfSingleDeal()) {
+        let lCard = localGameParity.judge.leader.getCard();
+        localGameParity.judge.setLeadCard(lCard);
+        let oCard = localGameParity.judge.opponent.getCard();
+        localGameParity.judge.setOpponentCard(oCard);
+        let winningPlayer = localGameParity.judge.getWinnerOfTrick();
+        winningPlayer.addTrick([
+          localGameParity.judge.getLeadCard(),
+          localGameParity.judge.getOpponentCard()
+        ]);
+      }
+
+      localGameParity.judge.setTotalPoints();
+
+      if (localGameParity.lowerHandPlayer.deal_points >
+              localGameParity.upperHandPlayer.deal_points &&
+          testingParity == ODD) {
+        nr_of_odd_games_won++;
+      } else if (
+          localGameParity.lowerHandPlayer.deal_points >
+              localGameParity.upperHandPlayer.deal_points &&
+          testingParity == EVEN) {
+        nr_of_even_games_won++;
+      }
+    }
+    if(nr_of_odd_games_won > nr_of_even_games_won) {
+      return ODD;
+    } else {
+      return EVEN;
+    }
   }
 
   // getCard1() chooses a random valid card to play
