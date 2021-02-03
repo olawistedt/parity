@@ -32,6 +32,7 @@ class PlayScene extends Phaser.Scene {
 
     this.sprites_hash = {};  // All sprites with 3 characters as keys
     this.anims_hash = {};  // All sprites has an animation with front and back.
+    this.first_time = true;
   }
 
   init(data) {
@@ -121,8 +122,10 @@ class PlayScene extends Phaser.Scene {
                                    .setVisible(true);
 
     // Talk to the game engine begins
-    let dealOrder = globalGameParity.dealer.randomDealer();
-    globalGameParity.judge.init(dealOrder[0], dealOrder[1]);
+    if (this.first_time) {
+      globalGameParity.newGame();
+      this.first_time = false;
+    }
     globalGameParity.newSingleDeal();
     globalGameParity.dealer.shuffle();
     globalGameParity.upperHandPlayer.setName('Computer');
@@ -130,8 +133,10 @@ class PlayScene extends Phaser.Scene {
     let deck_pos;
     if (globalGameParity.dealer.current_dealer ==
         globalGameParity.lowerHandPlayer) {
+      console.log('Lower hand is dealer.');
       deck_pos = 1;
     } else {
+      console.log('Upper hand is dealer.');
       deck_pos = -1;
     }
     // Talk to the game engine ends
@@ -263,7 +268,7 @@ class PlayScene extends Phaser.Scene {
   }
 
   decideTrumpAndParity() {
-    if (globalGameParity.judge.dealer == globalGameParity.lowerHandPlayer) {
+    if (globalGameParity.judge.dealer.current_dealer == globalGameParity.lowerHandPlayer) {
       let trump = globalGameParity.upperHandPlayer.getTrump();
       this.chooseTrumpAndParityText.setText(
           'AI NOMINATES THE TRUMP SUIT ' + colorFullName(trump) +
