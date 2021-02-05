@@ -58,9 +58,9 @@ class PlayScene extends Phaser.Scene {
 
     // Audios
     this.load.audio('wrong_card', ['assets/sound/wrong_card.mp3']);
-    this.load.audio('play_card', ['assets/sound/PlayCard.mp3']);
-    this.load.audio('deal_card', ['assets/sound/DealCard.mp3']);
-    this.load.audio('shuffle', ['assets/sound/Shuffle.mp3']);
+    //    this.load.audio('play_card', ['assets/sound/PlayCard.mp3']);
+    //    this.load.audio('deal_card', ['assets/sound/DealCard.mp3']);
+    //    this.load.audio('shuffle', ['assets/sound/Shuffle.mp3']);
   }
 
   create() {
@@ -69,10 +69,10 @@ class PlayScene extends Phaser.Scene {
         'cloth');  // Add the background
 
     this.snd_wrong_card = this.sound.add('wrong_card');
-    this.snd_shuffle = this.sound.add('shuffle');
-    this.snd_play_card = this.sound.add('play_card');
-    this.snd_play_upper_card = this.sound.add('play_card');
-    this.snd_deal_card = this.sound.add('deal_card');
+    //    this.snd_deal_card = this.sound.add('deal_card');
+    //    this.snd_shuffle = this.sound.add('shuffle');
+    //    this.snd_play_card = this.sound.add('play_card');
+    //    this.snd_play_upper_card = this.sound.add('play_card');
 
     this.chooseTrumpAndParityText =
         this.add
@@ -239,7 +239,7 @@ class PlayScene extends Phaser.Scene {
       dealTween[i].on('complete', () => {
         if (i != 0) {  // The cards to be dealth
           dealTween[i - 1].play();
-          this.snd_deal_card.play();
+          //          this.snd_deal_card.play();
         } else {
           // Turn the lower hand cards to show front
           this.lower_hand_ids.forEach(e => {
@@ -254,11 +254,11 @@ class PlayScene extends Phaser.Scene {
       });
     }
     dealTween[CARD_PARITY_IDS.length - 1].play();
-    this.snd_deal_card.play();
+    //    this.snd_deal_card.play();
   }
 
   placeCardsNice() {
-    globalGameParity.upperHandPlayer.sortHand();
+//    globalGameParity.upperHandPlayer.sortHand();
     globalGameParity.lowerHandPlayer.sortHand();
 
     if (globalGameParity.upperHandPlayer.getHand().length == 0) {
@@ -432,7 +432,7 @@ class PlayScene extends Phaser.Scene {
       //
       // Play upper hand to table
       //
-      this.snd_play_upper_card.play();
+      //      this.snd_play_upper_card.play();
       let upper_hand_card = globalGameParity.judge.leader.getCard();
       globalGameParity.judge.setLeadCard(upper_hand_card);
       let ai_sprite = this.sprites_hash[upper_hand_card];
@@ -472,7 +472,7 @@ class PlayScene extends Phaser.Scene {
     //
     // Play upper hand to table
     //
-    this.snd_play_upper_card.play();
+    //    this.snd_play_upper_card.play();
     let upper_hand_card = globalGameParity.judge.opponent.getCard();
     globalGameParity.judge.setOpponentCard(upper_hand_card);
     let ai_sprite = this.sprites_hash[upper_hand_card];
@@ -494,7 +494,7 @@ class PlayScene extends Phaser.Scene {
   cardIsPressed(sprite) {
     //    console.log('Pointer down on card ' + sprite.name);
     if (globalGameParity.lowerHandPlayer.getCard(sprite.name)) {
-      this.snd_play_card.play();
+      //      this.snd_play_card.play();
       if (globalGameParity.judge.leader == globalGameParity.lowerHandPlayer) {
         globalGameParity.judge.setLeadCard(sprite.name);
       } else {
@@ -534,10 +534,6 @@ class PlayScene extends Phaser.Scene {
       globalGameParity.judge.getLeadCard(),
       globalGameParity.judge.getOpponentCard()
     ]);
-    this.showUpperNrOfTricks.setText(
-        globalGameParity.upperHandPlayer.getNrOfTricks());
-    this.showLowerNrOfTricks.setText(
-        globalGameParity.lowerHandPlayer.getNrOfTricks());
     this.showBack(globalGameParity.judge.getLeadCard());
     this.showBack(globalGameParity.judge.getOpponentCard());
     console.log(
@@ -567,6 +563,10 @@ class PlayScene extends Phaser.Scene {
         angle: 90
       });
       getTrick.on('complete', () => {
+        this.showUpperNrOfTricks.setText(
+            globalGameParity.upperHandPlayer.getNrOfTricks());
+        this.showLowerNrOfTricks.setText(
+            globalGameParity.lowerHandPlayer.getNrOfTricks());
         if (!globalGameParity.judge.isEndOfSingleDeal()) {
           this.playCards();
         } else {
