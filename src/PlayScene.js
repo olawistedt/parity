@@ -36,9 +36,9 @@ class PlayScene extends Phaser.Scene {
   }
 
   init(data) {
-  if (data.caller == 'menu') {
-    globalGameParity.setAiLevel(data.level);
-  }
+    if (data.caller == 'menu') {
+      globalGameParity.setAiLevel(data.level);
+    }
 
     this.lower_hand_ids = [];
   }
@@ -300,6 +300,7 @@ class PlayScene extends Phaser.Scene {
           '\n                   STATE ODD OR EVEN');
       this.chooseTrumpAndParityText.setVisible(true);
       globalGameParity.judge.setTrump(trump);
+      this.placeCardsNice();
       //      console.log('Upper hand chooses trump ' + trump);
       let button_odd = this.add.image(0, 0, 'button_odd')
                            .setVisible(true)
@@ -376,6 +377,7 @@ class PlayScene extends Phaser.Scene {
       button_clubs.on('pointerdown', () => {
         pointerDownCommon();
         globalGameParity.judge.setTrump('c');
+        this.placeCardsNice();
       });
       let button_diamonds = this.add.image(0, 0, 'button_diamonds')
                                 .setVisible(true)
@@ -386,6 +388,7 @@ class PlayScene extends Phaser.Scene {
       button_diamonds.on('pointerdown', () => {
         pointerDownCommon();
         globalGameParity.judge.setTrump('d');
+        this.placeCardsNice();
       });
       let button_hearts = this.add.image(0, 0, 'button_hearts')
                               .setVisible(true)
@@ -396,6 +399,7 @@ class PlayScene extends Phaser.Scene {
       button_hearts.on('pointerdown', () => {
         pointerDownCommon();
         globalGameParity.judge.setTrump('h');
+        this.placeCardsNice();
       });
       let button_spades = this.add.image(0, 0, 'button_spades')
                               .setVisible(true)
@@ -405,6 +409,7 @@ class PlayScene extends Phaser.Scene {
       button_spades.on('pointerdown', () => {
         pointerDownCommon();
         globalGameParity.judge.setTrump('s');
+        this.placeCardsNice();
       });
       if (TEST) {
         button_clubs.emit('pointerdown');

@@ -85,8 +85,89 @@ class Player {
   }
 
   sortHand() {
-    this.hand.sort();
-    this.hand.reverse();
+    if (this.judge.getTrump() == undefined) {
+      this.hand.sort();
+      this.hand.reverse();
+    } else {
+      if (this.judge.getTrump() == 'c') {
+        if (this.hand.includes('jk_b')) {
+          let index = this.hand.indexOf('jk_b');
+          this.hand[index] = 'c16';
+        }
+        if (this.hand.includes('jk_r')) {
+          let index = this.hand.indexOf('jk_r');
+          this.hand[index] = 'c15';
+        }
+      } else if (this.judge.getTrump() == 's') {
+        if (this.hand.includes('jk_b')) {
+          let index = this.hand.indexOf('jk_b');
+          this.hand[index] = 's16';
+        }
+        if (this.hand.includes('jk_r')) {
+          let index = this.hand.indexOf('jk_r');
+          this.hand[index] = 's15';
+        }
+      } else if (this.judge.getTrump() == 'h') {
+        if (this.hand.includes('jk_b')) {
+          let index = this.hand.indexOf('jk_b');
+          this.hand[index] = 'h15';
+        }
+        if (this.hand.includes('jk_r')) {
+          let index = this.hand.indexOf('jk_r');
+          this.hand[index] = 'h16';
+        }
+      } else if (this.judge.getTrump() == 'd') {
+        if (this.hand.includes('jk_b')) {
+          let index = this.hand.indexOf('jk_b');
+          this.hand[index] = 'd15';
+        }
+        if (this.hand.includes('jk_r')) {
+          let index = this.hand.indexOf('jk_r');
+          this.hand[index] = 'd16';
+        }
+      }
+
+      this.hand.sort();
+      this.hand.reverse();
+
+      if (this.judge.getTrump() == 'c') {
+        if (this.hand.includes('c16')) {
+          let index = this.hand.indexOf('c16');
+          this.hand[index] = 'jk_b';
+        }
+        if (this.hand.includes('c15')) {
+          let index = this.hand.indexOf('c15');
+          this.hand[index] = 'jk_r';
+        }
+      } else if (this.judge.getTrump() == 's') {
+        if (this.hand.includes('s16')) {
+          let index = this.hand.indexOf('s16');
+          this.hand[index] = 'jk_b';
+        }
+        if (this.hand.includes('s15')) {
+          let index = this.hand.indexOf('s15');
+          this.hand[index] = 'jk_r';
+        }
+      } else if (this.judge.getTrump() == 'h') {
+        if (this.hand.includes('h15')) {
+          let index = this.hand.indexOf('h15');
+          this.hand[index] = 'jk_b';
+        }
+        if (this.hand.includes('h16')) {
+          let index = this.hand.indexOf('h16');
+          this.hand[index] = 'jk_r';
+        }
+      } else if (this.judge.getTrump() == 'd') {
+        if (this.hand.includes('d15')) {
+          let index = this.hand.indexOf('d15');
+          this.hand[index] = 'jk_b';
+        }
+        if (this.hand.includes('d16')) {
+          let index = this.hand.indexOf('d16');
+          this.hand[index] = 'jk_r';
+        }
+      }
+    }
   }
 
   addTrick(trick) {
