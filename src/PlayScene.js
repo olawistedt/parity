@@ -36,6 +36,10 @@ class PlayScene extends Phaser.Scene {
   }
 
   init(data) {
+  if (data.caller == 'menu') {
+    globalGameParity.setAiLevel(data.level);
+  }
+
     this.lower_hand_ids = [];
   }
 

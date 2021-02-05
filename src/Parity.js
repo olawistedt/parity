@@ -824,6 +824,9 @@ class GameParity extends Game {
     let a = [this.upperHandPlayer, this.lowerHandPlayer];
     this.dealer = new ParityDealer(a);
   }
+  setAiLevel(level) {
+    this.upperHandPlayer.setAiLevel(level);
+  }
   newGame() {
     let dealOrder = this.dealer.randomDealer();
     this.judge.init(dealOrder[0], dealOrder[1]);
