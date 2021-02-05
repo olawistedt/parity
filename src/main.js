@@ -3,8 +3,9 @@
 
 const CST = {
   SCENES: {
+    MENU: 'MENU',
     PLAY: 'PLAY',
-    scene: [PlayScene],
+    scene: [MenuScene, PlayScene],
   }
 }
 
@@ -19,6 +20,9 @@ let game = new Phaser.Game({
   audio: {disableWebAudio: true},
 
   scene: [
+    MenuScene,
+    RulesScene,
+    CreditsScene,
     PlayScene,
     ScoreScene,
   ],

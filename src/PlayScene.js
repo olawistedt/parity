@@ -16,7 +16,7 @@ alert /** @type {import("../typings")} */
 
 // Use shift-F5 to reload program
 const TEST = false;
-const SPEED = 400;  // Good for playing live is 400
+const SPEED = 350;  // 350;  // Good for playing live is 400
 const UPPER_HAND_IS_DEALER = -1;
 const LOWER_HAND_IS_DEALER = 1;
 const FRONT_FRAME = 0;
@@ -54,6 +54,9 @@ class PlayScene extends Phaser.Scene {
 
     // Audios
     this.load.audio('wrong_card', ['assets/sound/wrong_card.mp3']);
+    this.load.audio('play_card', ['assets/sound/PlayCard.mp3']);
+    this.load.audio('deal_card', ['assets/sound/DealCard.mp3']);
+    this.load.audio('shuffle', ['assets/sound/Shuffle.mp3']);
   }
 
   create() {
@@ -62,6 +65,10 @@ class PlayScene extends Phaser.Scene {
         'cloth');  // Add the background
 
     this.snd_wrong_card = this.sound.add('wrong_card');
+    this.snd_shuffle = this.sound.add('shuffle');
+    this.snd_play_card = this.sound.add('play_card');
+    this.snd_play_upper_card = this.sound.add('play_card');
+    this.snd_deal_card = this.sound.add('deal_card');
 
     this.chooseTrumpAndParityText =
         this.add
@@ -122,21 +129,30 @@ class PlayScene extends Phaser.Scene {
                                    .setVisible(true);
 
     // Talk to the game engine begins
+    globalGameParity.upperHandPlayer.setName('Computer');
+    globalGameParity.lowerHandPlayer.setName('Ola');
+
     if (this.first_time) {
       globalGameParity.newGame();
       this.first_time = false;
     }
     globalGameParity.newSingleDeal();
     globalGameParity.dealer.shuffle();
-    globalGameParity.upperHandPlayer.setName('Computer');
-    globalGameParity.lowerHandPlayer.setName('Ola');
     let deck_pos;
     if (globalGameParity.dealer.current_dealer ==
         globalGameParity.lowerHandPlayer) {
       console.log('Lower hand is dealer.');
+      if (globalGameParity.lowerHandPlayer ==
+          globalGameParity.judge.opponent) {
+        console.log('Lower hand is opponent.');
+      }
       deck_pos = 1;
     } else {
       console.log('Upper hand is dealer.');
+      if (globalGameParity.upperHandPlayer ==
+          globalGameParity.judge.opponent) {
+        console.log('Upper hand is opponent.');
+      }
       deck_pos = -1;
     }
     // Talk to the game engine ends
@@ -144,6 +160,8 @@ class PlayScene extends Phaser.Scene {
     //
     // Place the deck
     //
+
+    //    this.snd_shuffle.play();
     for (let i = CARD_PARITY_IDS.length - 1; i > -1; i--) {
       let card_id = globalGameParity.dealer.deck[i];
 
@@ -217,6 +235,7 @@ class PlayScene extends Phaser.Scene {
       dealTween[i].on('complete', () => {
         if (i != 0) {  // The cards to be dealth
           dealTween[i - 1].play();
+          this.snd_deal_card.play();
         } else {
           // Turn the lower hand cards to show front
           this.lower_hand_ids.forEach(e => {
@@ -231,6 +250,7 @@ class PlayScene extends Phaser.Scene {
       });
     }
     dealTween[CARD_PARITY_IDS.length - 1].play();
+    this.snd_deal_card.play();
   }
 
   placeCardsNice() {
@@ -268,7 +288,8 @@ class PlayScene extends Phaser.Scene {
   }
 
   decideTrumpAndParity() {
-    if (globalGameParity.judge.dealer.current_dealer == globalGameParity.lowerHandPlayer) {
+    if (globalGameParity.judge.eldest == globalGameParity.upperHandPlayer) {
+      console.log('Upper hand is eldest (non dealer)');
       let trump = globalGameParity.upperHandPlayer.getTrump();
       this.chooseTrumpAndParityText.setText(
           'AI NOMINATES THE TRUMP SUIT ' + colorFullName(trump) +
@@ -399,7 +420,10 @@ class PlayScene extends Phaser.Scene {
   playCards() {
     this.showTrumpText.setText(colorFullName(globalGameParity.judge.trump));
     if (globalGameParity.judge.leader == globalGameParity.upperHandPlayer) {
+      //
       // Play upper hand to table
+      //
+      this.snd_play_upper_card.play();
       let upper_hand_card = globalGameParity.judge.leader.getCard();
       globalGameParity.judge.setLeadCard(upper_hand_card);
       let ai_sprite = this.sprites_hash[upper_hand_card];
@@ -415,27 +439,31 @@ class PlayScene extends Phaser.Scene {
 
       this.showFront(upper_hand_card);
       playUpperToTable.on('complete', () => {
-        //        console.log('Time to play the user card.');
         this.lower_hand_ids.forEach(e => {
           let s = this.sprites_hash[e];
           s.setInteractive();
         });
       });
     } else {
+      //
       // Play lower hand to table
+      //
       this.lower_hand_ids.forEach(e => {
         let s = this.sprites_hash[e];
         s.setInteractive();
       });
-      if (TEST) {
-        let card_id = globalGameParity.lowerHandPlayer.getCard();
-        this.sprites_hash[card_id].emit('pointerdown');
-      }
+    }
+    if (TEST) {
+      let card_id = globalGameParity.lowerHandPlayer.getCard();
+      this.sprites_hash[card_id].emit('pointerdown');
     }
   }
 
   playUpperHandAfterLowerHand() {
+    //
     // Play upper hand to table
+    //
+    this.snd_play_upper_card.play();
     let upper_hand_card = globalGameParity.judge.opponent.getCard();
     globalGameParity.judge.setOpponentCard(upper_hand_card);
     let ai_sprite = this.sprites_hash[upper_hand_card];
@@ -457,6 +485,7 @@ class PlayScene extends Phaser.Scene {
   cardIsPressed(sprite) {
     //    console.log('Pointer down on card ' + sprite.name);
     if (globalGameParity.lowerHandPlayer.getCard(sprite.name)) {
+      this.snd_play_card.play();
       if (globalGameParity.judge.leader == globalGameParity.lowerHandPlayer) {
         globalGameParity.judge.setLeadCard(sprite.name);
       } else {

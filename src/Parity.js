@@ -209,7 +209,7 @@ class Ai extends Player {
     // leader plays the first card.
     let localJudgeParity = new JudgeParity();
     let localGameParity = new GameParity(1, 1, localJudgeParity);
-    localGameParity.judge.setTrump(globalGameParity.judge.leader.getTrump());
+    localGameParity.judge.setTrump(globalGameParity.judge.getTrump());
     localGameParity.upperHandPlayer.setName('Opponent');
     localGameParity.lowerHandPlayer.setName('Leader');
 
@@ -256,7 +256,7 @@ class Ai extends Player {
         nr_of_even_games_won++;
       }
     }
-    if(nr_of_odd_games_won > nr_of_even_games_won) {
+    if (nr_of_odd_games_won > nr_of_even_games_won) {
       return ODD;
     } else {
       return EVEN;
@@ -529,6 +529,10 @@ class Judge {
     this.trump = color;
   }
 
+  getTrump() {
+    return this.trump;
+  }
+
   /**
    * Just change the leader (two players)
    */
@@ -707,6 +711,15 @@ class Dealer {
     this.clearHands();
   }
 
+  getDealer() {
+    return this.current_dealer;
+  }
+
+  getEldest() {
+    return this.arrayOfPlayers[(this.arrayOfPlayers.indexOf(this.current_dealer) + 1) %
+        this.arrayOfPlayers.length];
+  }
+
   clearHands() {
     this.arrayOfPlayers.forEach(p => {
       p.clearHand();
@@ -741,7 +754,8 @@ class Dealer {
       this.deck.push(card_id);
     }
   }
-}
+
+}  // End of class Dealer
 
 /**
  * @classdesc

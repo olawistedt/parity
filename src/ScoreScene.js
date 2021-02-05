@@ -90,6 +90,9 @@ class ScoreScene extends Phaser.Scene {
       play_button.setInteractive();
       play_button.on('pointerdown', () => {
         globalGameParity.dealer.nextDealer();
+        globalJudgeParity.init(
+            globalGameParity.dealer.getDealer(),
+            globalGameParity.dealer.getEldest());
         this.scene.start('PLAY', {caller: 'score'});
       });
       //   if (TEST) {
