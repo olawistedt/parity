@@ -85,88 +85,86 @@ class Player {
   }
 
   sortHand() {
+    let clubs = this.hand.filter(e => e[0] == 'c');
+    let diamonds = this.hand.filter(e => e[0] == 'd');
+    let spades = this.hand.filter(e => e[0] == 's');
+    let hearts = this.hand.filter(e => e[0] == 'h');
+    let jokers = this.hand.filter(e => e[0] == 'j');
+
+    if (clubs.length > 0) {
+      clubs.sort();
+      clubs.reverse();
+    }
+    if (diamonds.length > 0) {
+      diamonds.sort();
+      diamonds.reverse();
+    }
+
+    if (spades.length > 0) {
+      spades.sort();
+      spades.reverse();
+    }
+
+    if (hearts.length > 0) {
+      hearts.sort();
+      hearts.reverse();
+    }
+
     if (this.judge.getTrump() == undefined) {
-      this.hand.sort();
-      this.hand.reverse();
+      this.hand = [];
+      this.hand = this.hand.concat(jokers);
+      this.hand = this.hand.concat(clubs);
+      this.hand = this.hand.concat(diamonds);
+      this.hand = this.hand.concat(spades);
+      this.hand = this.hand.concat(hearts);
     } else {
+      let result = [];
       if (this.judge.getTrump() == 'c') {
-        if (this.hand.includes('jk_b')) {
-          let index = this.hand.indexOf('jk_b');
-          this.hand[index] = 'c16';
-        }
         if (this.hand.includes('jk_r')) {
-          let index = this.hand.indexOf('jk_r');
-          this.hand[index] = 'c15';
+          clubs.unshift('jk_r');
         }
-      } else if (this.judge.getTrump() == 's') {
         if (this.hand.includes('jk_b')) {
-          let index = this.hand.indexOf('jk_b');
-          this.hand[index] = 's16';
+          clubs.unshift('jk_b');
         }
-        if (this.hand.includes('jk_r')) {
-          let index = this.hand.indexOf('jk_r');
-          this.hand[index] = 's15';
-        }
-      } else if (this.judge.getTrump() == 'h') {
-        if (this.hand.includes('jk_b')) {
-          let index = this.hand.indexOf('jk_b');
-          this.hand[index] = 'h15';
-        }
-        if (this.hand.includes('jk_r')) {
-          let index = this.hand.indexOf('jk_r');
-          this.hand[index] = 'h16';
-        }
+        result = result.concat(clubs);
+        result = result.concat(diamonds);
+        result = result.concat(spades);
+        result = result.concat(hearts);
       } else if (this.judge.getTrump() == 'd') {
         if (this.hand.includes('jk_b')) {
-          let index = this.hand.indexOf('jk_b');
-          this.hand[index] = 'd15';
+          diamonds.unshift('jk_b');
         }
         if (this.hand.includes('jk_r')) {
-          let index = this.hand.indexOf('jk_r');
-          this.hand[index] = 'd16';
+          diamonds.unshift('jk_r');
         }
-      }
-
-      this.hand.sort();
-      this.hand.reverse();
-
-      if (this.judge.getTrump() == 'c') {
-        if (this.hand.includes('c16')) {
-          let index = this.hand.indexOf('c16');
-          this.hand[index] = 'jk_b';
-        }
-        if (this.hand.includes('c15')) {
-          let index = this.hand.indexOf('c15');
-          this.hand[index] = 'jk_r';
-        }
+        result = result.concat(diamonds);
+        result = result.concat(spades);
+        result = result.concat(hearts);
+        result = result.concat(clubs);
       } else if (this.judge.getTrump() == 's') {
-        if (this.hand.includes('s16')) {
-          let index = this.hand.indexOf('s16');
-          this.hand[index] = 'jk_b';
+        if (this.hand.includes('jk_r')) {
+          spades.unshift('jk_r');
         }
-        if (this.hand.includes('s15')) {
-          let index = this.hand.indexOf('s15');
-          this.hand[index] = 'jk_r';
+        if (this.hand.includes('jk_b')) {
+          spades.unshift('jk_b');
         }
+        result = result.concat(spades);
+        result = result.concat(hearts);
+        result = result.concat(clubs);
+        result = result.concat(diamonds);
       } else if (this.judge.getTrump() == 'h') {
-        if (this.hand.includes('h15')) {
-          let index = this.hand.indexOf('h15');
-          this.hand[index] = 'jk_b';
+        if (this.hand.includes('jk_b')) {
+          hearts.unshift('jk_b');
         }
-        if (this.hand.includes('h16')) {
-          let index = this.hand.indexOf('h16');
-          this.hand[index] = 'jk_r';
+        if (this.hand.includes('jk_r')) {
+          hearts.unshift('jk_r');
         }
-      } else if (this.judge.getTrump() == 'd') {
-        if (this.hand.includes('d15')) {
-          let index = this.hand.indexOf('d15');
-          this.hand[index] = 'jk_b';
-        }
-        if (this.hand.includes('d16')) {
-          let index = this.hand.indexOf('d16');
-          this.hand[index] = 'jk_r';
-        }
+        result = result.concat(hearts);
+        result = result.concat(clubs);
+        result = result.concat(diamonds);
+        result = result.concat(spades);
       }
+      this.hand = result;
     }
   }
 
