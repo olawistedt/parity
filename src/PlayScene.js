@@ -16,13 +16,12 @@ alert /** @type {import("../typings")} */
 
 // Use shift-F5 to reload program
 const TEST = false;
-const SPEED = 350;  // 350;  // Good for playing live is 400
+const SPEED = 0;  // 350;  // Good for playing live is 400
 const UPPER_HAND_IS_DEALER = -1;
 const LOWER_HAND_IS_DEALER = 1;
 const FRONT_FRAME = 0;
 const BACK_FRAME = 1;
-const HAND_DIST_FROM_HORISONTAL_BORDERS = 150;
-const HAND_DIST_FROM_VERTICAL_BORDERS = 110;
+const HAND_DIST_FROM_HORISONTAL_BORDERS = 100;
 const HAND_DIST_BETWEEN_CARDS = 50;
 const TRICKS_FROM_HORISONTAL_BORDER = 350;
 
@@ -77,8 +76,8 @@ class PlayScene extends Phaser.Scene {
     this.chooseTrumpAndParityText =
         this.add
             .text(
-                this.game.renderer.width / 2, this.game.renderer.height / 2,
-                '#Placeholder#', {
+                this.game.renderer.width / 2,
+                this.game.renderer.height / 2 - 125, '#Placeholder#', {
                   fontFamily: '"Arial"',
                   fontSize: '40px',
                   depth: 100
@@ -89,7 +88,7 @@ class PlayScene extends Phaser.Scene {
 
     this.showTrumpText =
         this.add
-            .text(this.game.renderer.width - 100, 23, 'Trump', {
+            .text(this.game.renderer.width - 30, 23, 'Trump', {
               fontFamily: '"Arial"',
               fontSize: '12px',
               depth: 100
@@ -100,7 +99,7 @@ class PlayScene extends Phaser.Scene {
 
     this.showParityText =
         this.add
-            .text(this.game.renderer.width - 100, 37, 'Parity', {
+            .text(this.game.renderer.width - 30, 37, 'Parity', {
               fontFamily: '"Arial"',
               fontSize: '12px',
               depth: 100
@@ -118,7 +117,7 @@ class PlayScene extends Phaser.Scene {
               // backgroundColor: '#0'
             })
             .setOrigin(0.5)
-            .setVisible(true);
+            .setVisible(false);
 
     this.showLowerNrOfTricks = this.add
                                    .text(
@@ -130,7 +129,7 @@ class PlayScene extends Phaser.Scene {
                                          // backgroundColor: '#0'
                                        })
                                    .setOrigin(0.5)
-                                   .setVisible(true);
+                                   .setVisible(false);
 
     // Talk to the game engine begins
     globalGameParity.upperHandPlayer.setName('Computer');
@@ -170,14 +169,10 @@ class PlayScene extends Phaser.Scene {
       let card_id = globalGameParity.dealer.deck[i];
 
       this.sprites_hash[card_id] = this.add.sprite(
-          -1000, -1000,
+          80 + (CARD_PARITY_IDS.length - i) / 3,          // x position
+          this.game.renderer.height / 2 + deck_pos * 75,  // y position
           'back');  // Create sprites, and display them outside the screen.
       this.sprites_hash[card_id].setScale(.80);
-      this.sprites_hash[card_id].setX(
-          80 + (CARD_PARITY_IDS.length - i) / 3);  // x value
-      this.sprites_hash[card_id].setY(
-          this.game.renderer.height / 2 + (CARD_PARITY_IDS.length - i) / 3 +
-          deck_pos * 200);  // y value}
       this.sprites_hash[card_id].setDepth(i);
 
       this.anims.create({
@@ -211,7 +206,7 @@ class PlayScene extends Phaser.Scene {
            globalGameParity.lowerHandPlayer ==
                globalGameParity.dealer.current_dealer)) {
         y_base = HAND_DIST_FROM_HORISONTAL_BORDERS;
-        x_value = HAND_DIST_FROM_VERTICAL_BORDERS +
+        x_value = this.handDistFromVerticalBorder(true) +
             upper_x * HAND_DIST_BETWEEN_CARDS;
         upper_x++;
       } else {
@@ -222,7 +217,7 @@ class PlayScene extends Phaser.Scene {
             () => {this.cardIsPressed(this.sprites_hash[card_id])}, this);
 
         y_base = this.game.renderer.height - HAND_DIST_FROM_HORISONTAL_BORDERS;
-        x_value = HAND_DIST_FROM_VERTICAL_BORDERS +
+        x_value = this.handDistFromVerticalBorder(true) +
             lower_x * HAND_DIST_BETWEEN_CARDS;
         lower_x++;
       }
@@ -255,40 +250,6 @@ class PlayScene extends Phaser.Scene {
     }
     dealTween[CARD_PARITY_IDS.length - 1].play();
     //    this.snd_deal_card.play();
-  }
-
-  placeCardsNice() {
-//    globalGameParity.upperHandPlayer.sortHand();
-    globalGameParity.lowerHandPlayer.sortHand();
-
-    if (globalGameParity.upperHandPlayer.getHand().length == 0) {
-      return;
-    }
-
-    let upperTween;
-    let lowerTween;
-    for (let i = 0; i < globalGameParity.upperHandPlayer.getHand().length;
-         i++) {
-      upperTween = this.tweens.add({
-        targets:
-            this.sprites_hash[globalGameParity.upperHandPlayer.getHand()[i]],
-        x: HAND_DIST_FROM_VERTICAL_BORDERS + i * HAND_DIST_BETWEEN_CARDS,
-        y: HAND_DIST_FROM_HORISONTAL_BORDERS,
-        duration: SPEED / 2,
-        ease: 'Linear',
-        depth: i
-      });
-
-      lowerTween = this.tweens.add({
-        targets:
-            this.sprites_hash[globalGameParity.lowerHandPlayer.getHand()[i]],
-        x: HAND_DIST_FROM_VERTICAL_BORDERS + i * HAND_DIST_BETWEEN_CARDS,
-        y: this.game.renderer.height - HAND_DIST_FROM_HORISONTAL_BORDERS,
-        duration: SPEED / 2,
-        ease: 'Linear',
-        depth: i
-      });
-    }
   }
 
   decideTrumpAndParity() {
@@ -370,7 +331,7 @@ class PlayScene extends Phaser.Scene {
 
       let button_clubs = this.add.image(0, 0, 'button_clubs')
                              .setVisible(true)
-                             .setY(this.game.renderer.height / 2 + 70)
+                             .setY(this.game.renderer.height / 2 + 70 - 125)
                              .setX(this.game.renderer.width / 2)
                              .setInteractive();
 
@@ -379,11 +340,12 @@ class PlayScene extends Phaser.Scene {
         globalGameParity.judge.setTrump('c');
         this.placeCardsNice();
       });
-      let button_diamonds = this.add.image(0, 0, 'button_diamonds')
-                                .setVisible(true)
-                                .setY(this.game.renderer.height / 2 + 130)
-                                .setX(this.game.renderer.width / 2)
-                                .setInteractive();
+      let button_diamonds =
+          this.add.image(0, 0, 'button_diamonds')
+              .setVisible(true)
+              .setY(this.game.renderer.height / 2 + 130 - 125)
+              .setX(this.game.renderer.width / 2)
+              .setInteractive();
 
       button_diamonds.on('pointerdown', () => {
         pointerDownCommon();
@@ -392,7 +354,7 @@ class PlayScene extends Phaser.Scene {
       });
       let button_hearts = this.add.image(0, 0, 'button_hearts')
                               .setVisible(true)
-                              .setY(this.game.renderer.height / 2 + 190)
+                              .setY(this.game.renderer.height / 2 + 190 - 125)
                               .setX(this.game.renderer.width / 2)
                               .setInteractive();
 
@@ -403,7 +365,7 @@ class PlayScene extends Phaser.Scene {
       });
       let button_spades = this.add.image(0, 0, 'button_spades')
                               .setVisible(true)
-                              .setY(this.game.renderer.height / 2 + 250)
+                              .setY(this.game.renderer.height / 2 + 250 - 125)
                               .setX(this.game.renderer.width / 2)
                               .setInteractive();
       button_spades.on('pointerdown', () => {
@@ -579,6 +541,40 @@ class PlayScene extends Phaser.Scene {
     });
   }
 
+  placeCardsNice() {
+    //    globalGameParity.upperHandPlayer.sortHand();
+    globalGameParity.lowerHandPlayer.sortHand();
+
+    if (globalGameParity.upperHandPlayer.getHand().length == 0) {
+      return;
+    }
+
+    let upperTween;
+    let lowerTween;
+    for (let i = 0; i < globalGameParity.upperHandPlayer.getHand().length;
+         i++) {
+      upperTween = this.tweens.add({
+        targets:
+            this.sprites_hash[globalGameParity.upperHandPlayer.getHand()[i]],
+        x: this.handDistFromVerticalBorder() + i * HAND_DIST_BETWEEN_CARDS,
+        y: HAND_DIST_FROM_HORISONTAL_BORDERS,
+        duration: SPEED / 2,
+        ease: 'Linear',
+        depth: i
+      });
+
+      lowerTween = this.tweens.add({
+        targets:
+            this.sprites_hash[globalGameParity.lowerHandPlayer.getHand()[i]],
+        x: this.handDistFromVerticalBorder() + i * HAND_DIST_BETWEEN_CARDS,
+        y: this.game.renderer.height - HAND_DIST_FROM_HORISONTAL_BORDERS,
+        duration: SPEED / 2,
+        ease: 'Linear',
+        depth: i
+      });
+    }
+  }
+
   showFront(card_id) {
     let anim = this.anims_hash[card_id];
     let frame;
@@ -599,5 +595,17 @@ class PlayScene extends Phaser.Scene {
     } catch (err) {
       console.log('ERROR: showBack' + err);
     }
+  }
+
+  handDistFromVerticalBorder(inDeal) {
+    let handLength;
+    if (inDeal) {
+      handLength = 15;
+    } else {
+      handLength = globalGameParity.lowerHandPlayer.getHand().length;
+    }
+    let x = this.game.renderer.width / 2 -
+        handLength / 2 * HAND_DIST_BETWEEN_CARDS + HAND_DIST_BETWEEN_CARDS / 2;
+    return x;
   }
 }
